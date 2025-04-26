@@ -1,0 +1,81 @@
+
+
+
+,,,১. অ্যাডমিন কন্ট্রোল এবং এমপ্লয়ার ম্যানেজমেন্ট
+অ্যাডমিন প্যানেল থেকে employer registration approval/management।
+
+Employer types আলাদা করা:
+
+Direct hire employer
+
+Recruitment agency (local & overseas)
+
+নিয়ম অনুযায়ী নিয়ন্ত্রণ রাখতে হবে এসব ক্যাটেগরি অনুযায়ী।
+
+২. প্ল্যান ও সাবস্ক্রিপশন সিস্টেম
+Free and paid tiered plans তৈরি করা।
+
+ভিন্ন প্ল্যানে বিভিন্ন সুবিধা নির্ধারণ:
+
+কয়টি job পোস্ট করা যাবে
+
+কয়টি resume দেখা যাবে
+
+Smart search বা Resume database access থাকবে কি না ইত্যাদি।
+
+৩. Job Posting এবং Resume Access
+Employer:
+
+চাকরির বিজ্ঞাপন পোস্ট করতে পারবে
+
+আবেদনকৃত প্রার্থীদের CV দেখতে পারবে (plan অনুযায়ী সীমিত হতে পারে)
+
+AI Smart Resume Search: পুরো ডাটাবেস থেকে ক্যান্ডিডেট খুঁজতে পারবে (plan অনুযায়ী)
+
+৪. AI Features (Backend Logic)
+Resume parsing: Uploaded CV থেকে key info extract করা (name, skills, experience ইত্যাদি)
+
+Scoring system: ক্যান্ডিডেটদের র‍্যাংক করা based on job requirements
+
+Intelligent Matching: প্রোফাইল আর জব রিকোয়ারমেন্টের মিল অনুযায়ী best matches দেখানো।
+
+৫. Jobseeker ফিচারস
+Registration & login
+
+সিম্পল CV Upload করে আবেদন
+
+CV সিস্টেমে জমা হওয়ার পর, AI visibility enhance করবে (e.g., tagging, keyword boost)
+
+৬. ফ্রন্টএন্ড ডিজাইন
+Minimal UI, ঠিক OpenAI-এর মতো
+
+Initial version-এ শুধুমাত্র প্রয়োজনীয় ফিচার থাকবে (MVP)
+
+৭. API-ready Backend
+ভবিষ্যতের জন্য extensible REST API রাখা
+
+যাতে Mobile App বা অন্যান্য সিস্টেম future-এ সংযুক্ত করা যায়
+
+৮. Revenue Focus
+Monetization অপশন:
+
+Subscription plans
+
+Premium job posting
+
+Resume search credits ইত্যাদি
+
+এই কাজগুলো করতে গেলে তোমাকে Django-এর সাথে নিচের বিষয়গুলোতেও কাজ করতে হতে পারে:
+
+Django Admin Customization
+
+Django Rest Framework (API)
+
+Celery (Background Task—for AI parsing)
+
+3rd party AI tools or Open Source Resume parsers (e.g. spaCy, BERT, or Hugging Face models)
+
+Stripe/SSLCommerz for payments (if monetization needed)
+
+Simple authentication (with OTP/email verification)
+

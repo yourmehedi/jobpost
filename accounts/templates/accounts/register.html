@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .register-container {
+      background-color: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 450px;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .register-container h2 {
+      text-align: center;
+      font-size: 30px;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .register-container input[type="text"],
+    .register-container input[type="email"],
+    .register-container input[type="password"] {
+      width: 100%;
+      padding: 12px 40px 12px 15px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      position: relative;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 16px;
+      color: #666;
+    }
+
+    .register-container .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .register-container .checkbox-label input {
+      margin-right: 8px;
+    }
+
+    .register-container .checkbox-label a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .register-container .checkbox-label a:hover {
+      text-decoration: underline;
+    }
+
+    .register-container button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .register-container button:hover {
+      background-color: #0056b3;
+    }
+
+    .login-link {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .social-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .social-buttons a {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .register-container {
+      background-color: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 450px;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease; /* added transition */
+    }
+
+    .register-container:hover {
+      transform: translateY(-5px); /* smooth lift on hover */
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2); /* a bit deeper shadow on hover */
+    }
+
+    .google-btn {
+      background-color: #db4437;
+    }
+
+    .facebook-btn {
+      background-color: #3b5998;
+    }
+
+    .errorlist {
+      color: red;
+      font-size: 14px;
+      margin-top: -15px;
+      margin-bottom: 15px;
+      list-style: none;
+      padding-left: 0;
+    }
+
+    /* Success popup */
+    .popup {
+      display: none;
+      position: absolute;
+      top: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      font-size: 16px;
+      z-index: 10;
+      animation: fadeSlideDown 0.6s ease forwards;
+    }
+      .popup.success {
+        background-color: #28a745;
+      }
+
+      .popup.error {
+        background-color: #dc3545;
+      }
+
+    @keyframes fadeSlideDown {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="popup" id="successPopup">🎉 Registration Successful!</div>
+    <h2>Create an Account</h2>
+    <form method="POST" id="registerForm">
+      {% csrf_token %}
+      
+      {% if messages %}
+        {% for message in messages %}
+          <p class="popup {{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="email" name="email" placeholder="Email" required />
+      
+      <div class="password-wrapper">
+        <input type="password" name="password" placeholder="Password" id="passwordInput" required />
+        <span class="toggle-password" onclick="togglePassword()">👁</span>
+      </div>
+    
+      <div class="password-wrapper">
+        <input type="password" name="confirm_password" placeholder="Confirm Password" id="confirmInput" required />
+        <span class="toggle-password" onclick="toggleConfirm()">👁</span>
+      </div>
+    
+      <label class="checkbox-label">
+        <input type="checkbox" name="terms" required />
+        I agree to the <a href="#">Terms & Conditions</a>
+      </label>
+    
+      <button type="submit">Register</button>
+    
+      <div class="login-link">
+        Already have an account? <a href="{% url 'accounts:login' %}">Login here</a>
+      </div>
+    </form>
+    
+  </div>
+
+  <script>
+    function togglePassword() {
+      const input = document.getElementById("passwordInput");
+      input.type = input.type === "password" ? "text" : "password";
+    }
+
+    function toggleConfirm() {
+      const input = document.getElementById("confirmInput");
+      input.type = input.type === "password" ? "text" : "password";
+    }
+
+    // Popup on successful registration
+
+  </script>
+</body>
+</html>

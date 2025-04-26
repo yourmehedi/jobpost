@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Listings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f7f7f7;
+        }
+        .job-card {
+            background: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        .job-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .company {
+            color: #555;
+        }
+        .description {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Job Listings</h1>
+    {% for job in jobs %}
+        <div class="job-card">
+            <div class="job-title">{{ job.title }}</div>
+            <div class="company">{{ job.company.name }}</div>
+            <div class="location">📍 {{ job.location }}</div>
+            <div class="description">{{ job.description|truncatewords:30 }}</div>
+            {% if job.salary %}
+                <div class="salary">💰 {{ job.salary }}</div>
+            {% endif %}
+            <div class="posted">🕒 Posted on: {{ job.posted_at|date:"F j, Y, g:i a" }}</div>
+        </div>
+    {% empty %}
+        <p>No jobs found.</p>
+    {% endfor %}
+</body>
+</html>

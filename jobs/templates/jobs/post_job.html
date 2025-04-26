@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Job</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        form {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        div {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fde8e8;
+            border-radius: 4px;
+            margin-top: 20px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-container label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+        
+        @media (max-width: 600px) {
+            form {
+                padding: 20px;
+            }
+            
+            input[type="text"],
+            textarea,
+            button {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <form method="post">
+        {% csrf_token %}
+        <h2 style="text-align: center;">Post a job</h2>
+        <div>
+            <label for="jobTitle">Job Title</label>
+            <input type="text" id="jobTitle" name="jobTitle" maxlength="70" required placeholder="Enter job title">
+        </div>
+        
+        <div>
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" name="companyName" maxlength="50" required placeholder="Enter company name">
+        </div>
+        
+        <div>
+            <label for="jobDescription">Job Description</label>
+            <textarea id="jobDescription" name="jobDescription" required placeholder="Enter detailed job description"></textarea>
+        </div>
+        
+        <div>
+            <label for="l">Location</label>
+            <input type="text" id="l" name="l" value="Dhaka, Bangladesh" maxlength="256" placeholder="Enter job location">
+            <input type="hidden" name="formattedAddress" id="formattedAddress">
+        </div>
+        
+        <div>
+            <label for="salary">Salary (Optional)</label>
+            <input type="text" id="salary" name="salary" maxlength="50" placeholder="Example: $50,000 - $70,000 per year">
+        </div>
+        
+        <div class="checkbox-container">
+            <input type="checkbox" id="anonymizeEmail" name="anonymizeEmail" checked>
+            <label for="anonymizeEmail">Protect my email address</label>
+        </div>
+        
+        <button type="submit">Post Job</button>
+        
+        {% if message %}
+            <p class="error-message">{{ message }}</p>
+        {% endif %}
+    </form>
+</body>
+</html>

@@ -6,9 +6,11 @@ class CustomUser(AbstractUser):
     is_employer = models.BooleanField(default=False)
     is_agency = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
-    
+    is_approved = models.BooleanField(default=False)
+
     def __str__(self):
-        return self.email
+        return self.email 
+
 
 
 class Employer(models.Model):
@@ -23,3 +25,4 @@ class Employer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ({self.get_employer_type_display()})"
+

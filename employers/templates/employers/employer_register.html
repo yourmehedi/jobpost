@@ -1,0 +1,50 @@
+{% extends 'management/base_admin.html' %}
+
+{% block content %}
+<h2>Employer Registration</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="mb-3">
+        {{ form.company_name.label_tag }}
+        {{ form.company_name }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.employer_type.label_tag }}
+        {{ form.employer_type }}
+    </div>
+
+    <div id="license_fields" style="display: none;">
+        <div class="mb-3">
+            {{ form.license_number.label_tag }}
+            {{ form.license_number }}
+        </div>
+        <div class="mb-3">
+            {{ form.license_file.label_tag }}
+            {{ form.license_file }}
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
+<script>
+    function toggleLicenseFields() {
+        const type = document.getElementById('id_employer_type').value;
+        const licenseSection = document.getElementById('license_fields');
+        if (type === 'local_agency' || type === 'overseas_agency') {
+            licenseSection.style.display = 'block';
+        } else {
+            licenseSection.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleLicenseFields();
+        document.getElementById('id_employer_type').addEventListener('change', toggleLicenseFields);
+    });
+</script>
+{% endblock %}

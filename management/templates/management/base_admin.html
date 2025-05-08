@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { min-height: 100vh; display: flex; flex-direction: column; }
+        .main { flex: 1; display: flex; }
+        .sidebar { width: 250px; background: #343a40; color: #fff; min-height: 100vh; }
+        .sidebar a { color: #ccc; display: block; padding: 10px 20px; text-decoration: none; }
+        .sidebar a:hover { background: #495057; color: #fff; }
+        .content { flex: 1; padding: 20px; }
+        footer { background: #f8f9fa; text-align: center; padding: 10px 0; }
+    </style>
+</head>
+<body>
+
+<header class="bg-primary text-white p-3">
+    <h3 class="m-0">Admin Dashboard /
+        <style>
+            a {
+                font-style: italic;
+                color: #f8f9fa;
+            }
+        </style>
+        <a href="/">Home page</a>
+    </h3>
+</header>
+
+<div class="main">
+    <nav class="sidebar">
+        <h5 class="text-center py-3">Menu</h5>
+        <a href="{% url 'management:dashboard' %}">🏠 Dashboard</a>
+        <a href="{% url 'management:user_approval' %}">👤 User Approval</a>
+        <a href="{% url 'management:employer_verification' %}">🏢 Employer Verification</a>
+        <a href="{% url 'management:job_monitoring' %}">📄 Job Monitoring</a>
+    </nav>
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+
+<footer>
+    <p>&copy; {{ year }} Your Company | Admin Panel</p>
+</footer>
+
+</body>
+</html>

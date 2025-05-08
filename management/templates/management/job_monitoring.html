@@ -1,0 +1,15 @@
+{% extends 'management/base_admin.html' %}
+
+{% block content %}
+<h3>All Job Posts</h3>
+<table class="table table-striped">
+    <tr><th>Title</th><th>Employer</th><th>Status</th></tr>
+    {% for job in jobs %}
+    <tr>
+        <td>{{ job.title }}</td>
+        <td>{{ job.employer.user.username }}</td>
+        <td>{{ job.status }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

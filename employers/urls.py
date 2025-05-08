@@ -2,8 +2,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'employers'
+
 urlpatterns = [
-    # path('post-job/', views.post_job, name='post_job'),
-    # path('job-success/', views.job_success, name='job_success'),
-    # path('dashboard/', views.dashboard, name='dashboard'),
+    path('employer/register/', views.employer_register, name='employer_register'),
 ]

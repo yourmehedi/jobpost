@@ -20,6 +20,7 @@ class Job(models.Model):
     is_email_protected = models.BooleanField(default=True)
 
     skills = models.CharField(max_length=255, blank=True)
+    perks = models.CharField(max_length=255, blank=True)
     tech_stack = models.CharField(max_length=255, blank=True)
     vacancies = models.PositiveIntegerField(default=1)
     expiry_date = models.DateField(blank=True, null=True)

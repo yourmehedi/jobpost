@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Company, Job, JobPost
 from django.contrib import messages
@@ -99,9 +99,24 @@ def post_job(request):
 @login_required(login_url='accounts:login') 
 def job_list(request):
     jobs = Job.objects.select_related('company').order_by('-posted_at')
+
+    for job in jobs:
+        job.skill_list = job.skills.split(",") if job.skills else []
+        job.perk_list = job.perks.split(",") if job.perks else []
+
     return render(request, 'jobs/job_list.html', {'jobs': jobs})
 
+def job_detail(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    return render(request, 'jobs/job_detail.html', {'job': job})
 
+def apply(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+
+    if request.method == 'POST':
+        return render(request, 'jobs/apply_success.html', {'job': job})
+
+    return render(request, 'jobs/apply.html', {'job': job})
 
 def can_post_job(employer):
     limits = get_employer_limits(employer)

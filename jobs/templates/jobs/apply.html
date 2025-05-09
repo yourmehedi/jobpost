@@ -1,0 +1,35 @@
+<!-- templates/jobs/apply.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Apply for {{ job.title }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container my-5">
+    <div class="card p-4">
+      <h3>Apply for: {{ job.title }}</h3>
+      <p>Company: {{ job.company.name }}</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="name" class="form-label">Your Name</label>
+          <input type="text" name="name" id="name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Your Email</label>
+          <input type="email" name="email" id="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="message" class="form-label">Cover Letter / Message</label>
+          <textarea name="message" id="message" class="form-control" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Application</button>
+        <a href="{% url 'jobs:job_list' %}" class="btn btn-secondary">Back</a>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

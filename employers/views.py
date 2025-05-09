@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect
 from .forms import EmployerRegistrationForm
 from .models import EmployerProfile
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+
+User = get_user_model
 
 def employer_register(request):
     try:

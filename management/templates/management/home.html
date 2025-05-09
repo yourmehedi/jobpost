@@ -96,7 +96,7 @@
     <header>
         <a href="/" class="logo">JobPortal</a>
         <nav>
-          <a href="#">Find Job</a>
+          <a href="{% url 'jobs:job_list' %}">Find Job</a>
           <a href="{% url 'jobs:post_job' %}">Post Job</a>
           <a href="#">Search Resume</a>
           <a href="{% url 'accounts:login' %}">Login</a>

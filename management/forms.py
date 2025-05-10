@@ -1,7 +1,9 @@
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import Employer
 from django.core.exceptions import ValidationError
+
+User = get_user_model()
 
 class EmployerRegistrationForm(forms.ModelForm):
     username = forms.CharField()

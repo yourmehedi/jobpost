@@ -4,50 +4,78 @@ from django.shortcuts import render, redirect
 from .forms import EmployerRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
 from employers.models import EmployerProfile
 from jobs.models import Job
-
+from .models import *
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+User = get_user_model()
 
 
 def home(request):
     return render(request, 'management/home.html')
 
-
 def employer_register(request):
     if request.method == 'POST':
-        form = EmployerRegistrationForm(request.POST)
+        form = EmployerRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('/employer/success/')
+            employer = form.save(commit=False)
+            employer.user = request.user
+            employer.save()
+            return redirect('management:registration_success')  # বা যেখানেই পাঠাতে চাও
     else:
         form = EmployerRegistrationForm()
     return render(request, 'management/employer_register.html', {'form': form})
 
-
 def registration_success(request):
     return render(request, 'management/success.html')
 
-User = get_user_model()
-
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def dashboard_home(request):
     return render(request, 'management/dashboard_home.html')
+
+def superuser_login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            if user.is_superuser:
+                login(request, user)
+                return redirect('management:dashboard')  
+            else:
+                messages.error(request, 'you are nou superuser!')
+        else:
+            messages.error(request, 'Username and password wrong!')
+
+    return render(request, 'management/superuser_login.html')
 
 def user_approval(request):
     users = User.objects.filter(is_active=False)
     return render(request, 'management/user_approval.html', {'users': users})
 
+
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def employer_verification(request):
-    employers = EmployerProfile.objects.filter(license_verified=False)
+    employers = Employer.objects.filter(approval_status='pending')
     return render(request, 'management/employer_verification.html', {'employers': employers})
+
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
+def verify_employer(request, id):
+    employer = get_object_or_404(Employer, id=id)
+    employer.approval_status = 'approved'
+    employer.save()
+    return redirect('management:employer_verification')
 
 def job_monitoring(request):
     jobs = Job.objects.all()
     return render(request, 'management/job_monitoring.html', {'jobs': jobs})
-
 
 def approve_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     user.is_active = True
     user.save()
     return redirect('management:user_approval')
+

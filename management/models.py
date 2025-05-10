@@ -17,13 +17,13 @@ APPROVAL_STATUS_CHOICES = [
     ('rejected', 'Rejected'),
 ]
 
-
 class Employer(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='management_employer')
     company_name = models.CharField(max_length=255)
     company_website = models.URLField(blank=True, null=True)
     employer_type = models.CharField(max_length=20, choices=EMPLOYER_TYPE_CHOICES)
     approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='pending')
+    license_file = models.FileField(upload_to='licenses/', blank=True, null=True)  # <-- এই লাইনটি নতুন
     address = models.TextField(blank=True, null=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
     is_active = models.BooleanField(default=True)

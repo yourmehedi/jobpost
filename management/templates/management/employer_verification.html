@@ -1,5 +1,4 @@
 {% extends 'management/base_admin.html' %}
-
 {% block content %}
 <h3>Employers Awaiting Verification</h3>
 <table class="table">
@@ -7,9 +6,15 @@
     {% for emp in employers %}
     <tr>
         <td>{{ emp.user.username }}</td>
-        <td><a href="{{ emp.license_file.url }}" target="_blank">View License</a></td>
-        <td><a class="btn btn-primary" href="{% url 'verify_employer' emp.id %}">Verify</a></td>
+        <td>
+            {% if emp.license_file %}
+                <a href="{{ emp.license_file.url }}" target="_blank">View License</a>
+            {% else %}
+                <span>No License Uploaded</span>
+            {% endif %}
+        </td>
+        <td><a class="btn btn-primary" href="{% url 'management:verify_employer' emp.id %}">Verify</a></td>
     </tr>
     {% endfor %}
 </table>
-{% endblock %} 
+{% endblock %}

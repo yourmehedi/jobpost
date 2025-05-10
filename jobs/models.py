@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from accounts.models import CustomUser
 User = get_user_model()
+from management.models import Employer
+from django.utils import timezone
 
 class Company(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -19,6 +21,15 @@ class Job(models.Model):
     salary = models.CharField(max_length=50, blank=True, null=True)
     is_email_protected = models.BooleanField(default=True)
 
+    STATUS_CHOICES = [
+    ('active', 'Active'),
+    ('closed', 'Closed'),
+    ('expired', 'Expired'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+
+
+    employer = models.ForeignKey(Employer, on_delete=models.CASCADE, null=True, blank=True)
     skills = models.CharField(max_length=255, blank=True)
     perks = models.CharField(max_length=255, blank=True)
     tech_stack = models.CharField(max_length=255, blank=True)
@@ -55,3 +66,13 @@ class JobPost(models.Model):
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class JobApplication(models.Model):
+    job = models.ForeignKey('Job', on_delete=models.CASCADE, related_name='applications')
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField(blank=True)
+    reply = models.TextField(blank=True, null=True)
+    applied_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.name} applied for {self.job.title}"

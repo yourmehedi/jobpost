@@ -12,7 +12,7 @@ class EmployerRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = Employer
-        fields = ['company_name', 'employer_type', 'company_website']
+        fields = ['company_name', 'employer_type', 'company_website', 'license_file']
 
     def clean_username(self):
         username = self.cleaned_data['username']

@@ -1,0 +1,13 @@
+{% extends 'management/base_admin.html' %}
+{% block content %}
+<h3>Reply to {{ application.name }}</h3>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label class="form-label">Reply Message</label>
+    <textarea name="reply" rows="5" class="form-control">{{ application.reply }}</textarea>
+  </div>
+  <button type="submit" class="btn btn-success">Send Reply</button>
+  <a href="{% url 'jobs:applications_dashboard' %}" class="btn btn-secondary">Back</a>
+</form>
+{% endblock %}

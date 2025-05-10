@@ -13,5 +13,5 @@ urlpatterns = [
     path('verify-employer/<int:id>/', views.verify_employer, name='verify_employer'),
     path('management/employers/', views.employer_verification, name='employer_verification'),
     path('superuser-login/', views.superuser_login_view, name='superuser_login'),
-    path('jobs/', views.job_monitoring, name='job_monitoring'),
+    path('job-monitoring/', views.job_monitoring, name='job_monitoring'),
 ]

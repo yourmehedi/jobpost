@@ -77,7 +77,7 @@
 </head>
 <body>
     
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <h2>Employer Registration</h2>
         {% csrf_token %}
         {{ form.non_field_errors }}
@@ -99,7 +99,13 @@
             {{ form.email }}
             {{ form.email.errors }}
         </div>
-    
+
+        <div>
+            {{ form.license_file.label_tag }}
+            {{ form.license_file }}
+            {{ form.license_file.errors }}
+        </div>
+        
         <div>
             {{ form.company_name.label_tag }}
             {{ form.company_name }}

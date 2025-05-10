@@ -9,8 +9,7 @@ urlpatterns = [
     path('list/', views.job_list, name='job_list'),
     path('<int:job_id>/', views.job_detail, name='job_detail'),
     path('<int:job_id>/apply/', views.apply, name='apply'), 
-    # path('job-list/', job_list, name='job_list'),
-    # path('job-detail/<int:pk>/', job_detail, name='job_detail'),
-    # path('edit-job/<int:pk>/', edit_job, name='edit_job'),
-    # path('delete-job/<int:pk>/', delete_job, name='delete_job'),
+    path('applications/', views.job_applications_list, name='applications_dashboard'),
+    path('applications/<int:application_id>/reply/', views.reply_application, name='reply_application'),
+    path('applications/<int:application_id>/delete/', views.delete_application, name='delete_application'),
 ]

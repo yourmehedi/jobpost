@@ -4,8 +4,6 @@ from .models import *
 admin.site.register(Job)
 admin.site.register(Company)
 
-
-
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):
     list_display = ('title', 'employer', 'is_approved', 'created_at')
@@ -15,3 +13,9 @@ class JobPostAdmin(admin.ModelAdmin):
     def approve_job(self, request, queryset):
         queryset.update(is_approved=True)
     approve_job.short_description = "Approve selected job posts"
+
+
+@admin.register(JobApplication)
+class JobApplicationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'job', 'applied_at')
+    search_fields = ('name', 'email', 'job__title')

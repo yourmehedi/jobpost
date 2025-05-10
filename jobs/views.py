@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Company, Job, JobPost
+from .models import Company, Job, JobPost, JobApplication
 from django.contrib import messages
 from .utils import get_employer_limits
 from accounts.models import Employer
 from datetime import datetime
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import JobApplication
 
 def post_job(request):
     message = None
@@ -95,7 +97,6 @@ def post_job(request):
     }
     return render(request, 'jobs/post_job.html', context)
 
-
 @login_required(login_url='accounts:login') 
 def job_list(request):
     jobs = Job.objects.select_related('company').order_by('-posted_at')
@@ -114,15 +115,48 @@ def apply(request, job_id):
     job = get_object_or_404(Job, id=job_id)
 
     if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        JobApplication.objects.create(
+            job=job,
+            name=name,
+            email=email,
+            message=message
+        )
+
         return render(request, 'jobs/apply_success.html', {'job': job})
 
     return render(request, 'jobs/apply.html', {'job': job})
+
+
+@staff_member_required
+def job_applications_list(request):
+    applications = JobApplication.objects.all().order_by('-applied_at')
+    return render(request, 'jobs/applications_dashboard.html', {'applications': applications})
+
+@staff_member_required
+def reply_application(request, application_id):
+    app = get_object_or_404(JobApplication, id=application_id)
+
+    if request.method == 'POST':
+        app.reply = request.POST.get('reply')
+        app.save()
+        return redirect('jobs:applications_dashboard')
+
+    return render(request, 'jobs/reply_application.html', {'application': app})
+
+@staff_member_required
+def delete_application(request, application_id):
+    app = get_object_or_404(JobApplication, id=application_id)
+    app.delete()
+    return redirect('jobs:applications_dashboard')
 
 def can_post_job(employer):
     limits = get_employer_limits(employer)
     posted_jobs = JobPost.objects.filter(employer=employer).count()
     return posted_jobs < limits['job_limit']
-
 
 def create_job(request):
     employer = request.user.employer

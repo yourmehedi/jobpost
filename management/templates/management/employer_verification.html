@@ -8,7 +8,7 @@
         <td>{{ emp.user.username }}</td>
         <td>
             {% if emp.license_file %}
-                <a href="{{ emp.license_file.url }}" target="_blank">View License</a>
+                <a class="btn btn-primary" href="{{ emp.license_file.url }}" target="_blank">View License</a>
             {% else %}
                 <span>No License Uploaded</span>
             {% endif %}

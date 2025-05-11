@@ -56,7 +56,6 @@ def user_approval(request):
     users = User.objects.filter(is_active=False)
     return render(request, 'management/user_approval.html', {'users': users})
 
-
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def employer_verification(request):
     employers = Employer.objects.filter(approval_status='pending')

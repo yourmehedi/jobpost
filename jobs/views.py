@@ -7,6 +7,7 @@ from accounts.models import Employer
 from datetime import datetime
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import JobApplication
+from django.db.models import Q
 
 def post_job(request):
     message = None
@@ -98,14 +99,28 @@ def post_job(request):
     return render(request, 'jobs/post_job.html', context)
 
 @login_required(login_url='accounts:login') 
+
+
 def job_list(request):
+    query = request.GET.get('q', '')  
+
     jobs = Job.objects.select_related('company').order_by('-posted_at')
+
+    if query:
+        jobs = jobs.filter(
+            Q(title__icontains=query) |
+            Q(company__name__icontains=query)
+        )
 
     for job in jobs:
         job.skill_list = job.skills.split(",") if job.skills else []
         job.perk_list = job.perks.split(",") if job.perks else []
 
-    return render(request, 'jobs/job_list.html', {'jobs': jobs})
+    return render(request, 'jobs/job_list.html', {
+        'jobs': jobs,
+        'query': query,
+    })
+
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)

@@ -70,6 +70,38 @@
       <p>No jobs found.</p>
     {% endfor %}
   </div>
+  <!-- Pagination Controls -->
+  <nav>
+    <ul class="pagination justify-content-center">
+      {% if jobs.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?q={{ query }}&page={{ jobs.previous_page_number }}">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Previous</span>
+        </li>
+      {% endif %}
+
+      {% for num in jobs.paginator.page_range %}
+        {% if jobs.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > jobs.number|add:'-3' and num < jobs.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if jobs.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?q={{ query }}&page={{ jobs.next_page_number }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Next</span>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
 
 </body>
 </html>

@@ -1,0 +1,104 @@
+<!-- Employer Dashboard - Tailwind CSS Based Layout -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employer Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+
+  <!-- Header -->
+  <!-- Header -->
+    <header class="bg-blue-800 text-white py-4 shadow">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Employer Dashboard</h1>
+        
+        <div class="flex items-center space-x-4">
+        <span class="text-sm">Welcome, {{ request.user.username }}</span>
+        <a href="#" class="bg-white text-blue-800 px-3 py-1 rounded hover:bg-gray-200 text-sm">
+            Set Profile
+        </a>
+        <a href="/" class="hover:underline text-sm">Home</a>
+        </div>
+    </div>
+    </header>
+
+
+  <!-- Dashboard Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-lg font-semibold text-blue-800">Post a Job</h2>
+        <p class="text-sm mt-2">Create new job postings easily.</p>
+        <a href="#" class="mt-4 inline-block bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-900">Post Now</a>
+      </div>
+
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-lg font-semibold text-blue-800">Manage Jobs</h2>
+        <p class="text-sm mt-2">Edit or close your current job listings.</p>
+        <a href="#" class="mt-4 inline-block bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-900">View Jobs</a>
+      </div>
+
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-lg font-semibold text-blue-800">Search Resumes</h2>
+        <p class="text-sm mt-2">Find the perfect candidates based on skills and experience.</p>
+        <a href="#" class="mt-4 inline-block bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-900">Search</a>
+      </div>
+    </div>
+
+    <!-- Recent Job List -->
+    <section class="bg-white p-6 rounded shadow mb-8">
+      <h2 class="text-lg font-semibold mb-4">Your Posted Jobs</h2>
+      <table class="w-full table-auto text-sm">
+        <thead>
+          <tr class="bg-blue-100 text-left">
+            <th class="px-4 py-2">Job Title</th>
+            <th class="px-4 py-2">Location</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr class="border-t">
+            <td class="px-4 py-2">{{ job.title }}</td>
+            <td class="px-4 py-2">{{ job.location }}</td>
+            <td class="px-4 py-2">{{ job.status }}</td>
+            <td class="px-4 py-2">
+              <a href="#" class="text-blue-600 hover:underline">Edit</a>
+              |
+              <a href="#" class="text-red-600 hover:underline">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-4 py-2 text-center text-gray-500">No jobs posted yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Resume Preview -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-lg font-semibold mb-4">Recent Jobseeker Resumes</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        {% for resume in resumes %}
+        <div class="border p-4 rounded hover:shadow">
+          <h3 class="font-bold">{{ resume.full_name }}</h3>
+          <p class="text-sm text-gray-600">Skills: {{ resume.skills }}</p>
+          <p class="text-sm text-gray-600">Location: {{ resume.city }}, {{ resume.country }}</p>
+          <a href="#" class="text-blue-700 hover:underline text-sm">View Full Resume</a>
+        </div>
+        {% empty %}
+        <p class="text-gray-500">No resumes available yet.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  <footer class="text-center text-gray-500 py-6">
+    &copy; 2025 JobPortal. All rights reserved.
+  </footer>
+</body>
+</html>

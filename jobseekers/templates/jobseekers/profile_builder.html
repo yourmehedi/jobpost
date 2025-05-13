@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Jobseeker Profile</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+      height: 80px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #28a745;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #218838;
+    }
+
+    h4 {
+      margin-top: 30px;
+      color: #222;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Create Jobseeker Profile</h2>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <label>Full Name:</label>
+      <input type="text" name="full_name" value="{{ jobseeker.full_name }}">
+
+      <label>Date of Birth:</label>
+      <input type="date" name="dob" value="{{ jobseeker.date_of_birth }}">
+
+      <label>Gender:</label>
+      <select name="gender">
+        <option value="male" {% if jobseeker.gender == "male" %}selected{% endif %}>Male</option>
+        <option value="female" {% if jobseeker.gender == "female" %}selected{% endif %}>Female</option>
+        <option value="other" {% if jobseeker.gender == "other" %}selected{% endif %}>Other</option>
+      </select>
+
+      <label>Mobile:</label>
+      <input type="text" name="contact" value="{{ jobseeker.contact_number }}">
+
+      <label>Address:</label>
+      <textarea name="address">{{ jobseeker.address }}</textarea>
+
+      <label>Preferred Job Type:</label>
+      <select name="job_type">
+        <option value="local" {% if jobseeker.job_type_preference == "local" %}selected{% endif %}>Local</option>
+        <option value="abroad" {% if jobseeker.job_type_preference == "abroad" %}selected{% endif %}>Abroad</option>
+        <option value="remote" {% if jobseeker.job_type_preference == "remote" %}selected{% endif %}>Remote</option>
+      </select>
+
+      <label>Preferred Country:</label>
+      <input type="text" name="preferred_country" value="{{ jobseeker.preferred_country }}">
+
+      <label>Preferred City:</label>
+      <input type="text" name="preferred_city" value="{{ jobseeker.preferred_city }}">
+
+      <label>Passport Number:</label>
+      <input type="text" name="passport" value="{{ jobseeker.passport_number }}">
+
+      <label>National ID:</label>
+      <input type="text" name="nid" value="{{ jobseeker.national_id }}">
+
+      <label>Document Upload:</label>
+      <input type="file" name="document">
+
+      <h4>Additional Information</h4>
+
+      <label>About Me:</label>
+      <textarea name="about_me">{{ jobseeker.additionalinfo.about_me|default_if_none:"" }}</textarea>
+
+      <label>Achievements:</label>
+      <textarea name="achievements">{{ jobseeker.additionalinfo.achievements|default_if_none:"" }}</textarea>
+
+      <label>Hobbies:</label>
+      <textarea name="hobbies">{{ jobseeker.additionalinfo.hobbies|default_if_none:"" }}</textarea>
+
+      <button type="submit">Save</button>
+    </form>
+  </div>
+
+</body>
+</html>

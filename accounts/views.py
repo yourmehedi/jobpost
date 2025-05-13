@@ -58,6 +58,10 @@ def login(request):
 
     return render(request, 'accounts/login.html', context)
 
+def user_profile(request):
+
+    return render(request, 'accounts/profile.html')
+
 def logout_view(request):
     logout(request)
     return redirect('login')

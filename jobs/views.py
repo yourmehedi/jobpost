@@ -8,13 +8,22 @@ from datetime import datetime
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import JobApplication
 from django.db.models import Q
+from django.contrib.auth.decorators import user_passes_test
+from django.core.paginator import Paginator
 
+@login_required
 def post_job(request):
     message = None
     companies = Company.objects.all()
 
     if request.method == 'POST':
         try:
+            try:
+                employer = request.user.employer  
+            except Employer.DoesNotExist:
+                message = "You must have an employer account to post a job."
+                return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
+
             title = request.POST.get('jobTitle')
             company_name = request.POST.get('companyName')
             description = request.POST.get('jobDescription')
@@ -22,17 +31,14 @@ def post_job(request):
             formatted_address = request.POST.get('formattedAddress')
             salary = request.POST.get('salary')
             is_email_protected = request.POST.get('anonymizeEmail') == 'on'
-
             skills = request.POST.get('skills')
             tech_stack = ', '.join(request.POST.getlist('stack'))
 
-            # Convert string to int safely
             try:
                 vacancies = int(request.POST.get('vacancies'))
             except (TypeError, ValueError):
                 vacancies = 1
 
-            # Convert string to date safely
             expiry_date_str = request.POST.get('expiry')
             try:
                 expiry_date = datetime.strptime(expiry_date_str, "%Y-%m-%d").date() if expiry_date_str else None
@@ -53,16 +59,16 @@ def post_job(request):
             country = request.POST.get('country')
             english_required = request.POST.get('english_required') == 'on'
 
-            # Validate required fields
             required_fields = [title, company_name, description, location]
             if not all(required_fields):
                 message = "Please fill in all required fields."
             else:
-                company, created = Company.objects.get_or_create(name=company_name)
+                company, _ = Company.objects.get_or_create(name=company_name)
 
                 Job.objects.create(
                     title=title,
                     company=company,
+                    employer=employer,  
                     description=description,
                     location=location,
                     formatted_address=formatted_address,
@@ -83,11 +89,10 @@ def post_job(request):
                     province=province,
                     zip_code=zip_code,
                     country=country,
-                    english_required=english_required,
-                    posted_by=request.user
+                    english_required=english_required
                 )
 
-                return redirect('jobs:job_list')
+                return redirect('jobs:job_post_success')
 
         except Exception as e:
             message = f"An error occurred: {e}"
@@ -98,23 +103,29 @@ def post_job(request):
     }
     return render(request, 'jobs/post_job.html', context)
 
+
+def job_post_success(request):
+    return render(request, 'jobs/job_success.html')
+
 @login_required(login_url='accounts:login') 
-
-
 def job_list(request):
-    query = request.GET.get('q', '')  
-
-    jobs = Job.objects.select_related('company').order_by('-posted_at')
+    query = request.GET.get('q', '')
+    job_queryset = Job.objects.select_related('company').order_by('-posted_at')
 
     if query:
-        jobs = jobs.filter(
+        job_queryset = job_queryset.filter(
             Q(title__icontains=query) |
             Q(company__name__icontains=query)
         )
 
-    for job in jobs:
+    for job in job_queryset:
         job.skill_list = job.skills.split(",") if job.skills else []
         job.perk_list = job.perks.split(",") if job.perks else []
+
+    # Pagination: 5 jobs per page
+    paginator = Paginator(job_queryset, 8)
+    page_number = request.GET.get('page')
+    jobs = paginator.get_page(page_number)
 
     return render(request, 'jobs/job_list.html', {
         'jobs': jobs,
@@ -147,11 +158,13 @@ def apply(request, job_id):
 
 
 @staff_member_required
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def job_applications_list(request):
     applications = JobApplication.objects.all().order_by('-applied_at')
     return render(request, 'jobs/applications_dashboard.html', {'applications': applications})
 
 @staff_member_required
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def reply_application(request, application_id):
     app = get_object_or_404(JobApplication, id=application_id)
 
@@ -163,6 +176,7 @@ def reply_application(request, application_id):
     return render(request, 'jobs/reply_application.html', {'application': app})
 
 @staff_member_required
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def delete_application(request, application_id):
     app = get_object_or_404(JobApplication, id=application_id)
     app.delete()

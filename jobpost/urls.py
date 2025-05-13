@@ -10,6 +10,7 @@ urlpatterns = [
     path('social/', include('allauth.urls')),      
     path('employers/', include('employers.urls')),
     path('jobs/', include('jobs.urls')),
+    path('jobseekers/', include('jobseekers.urls')),
 ]
 
 

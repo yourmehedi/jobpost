@@ -55,6 +55,7 @@ def registration_success(request):
 def dashboard_home(request):
     return render(request, 'management/dashboard_home.html')
 
+
 def superuser_login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -72,6 +73,7 @@ def superuser_login_view(request):
 
     return render(request, 'management/superuser_login.html')
 
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def user_approval(request):
     users = User.objects.filter(is_active=False)
     return render(request, 'management/user_approval.html', {'users': users})
@@ -88,10 +90,13 @@ def verify_employer(request, id):
     employer.save()
     return redirect('management:employer_verification')
 
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def job_monitoring(request):
     jobs = Job.objects.all()
+
     return render(request, 'management/job_monitoring.html', {'jobs': jobs})
 
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def approve_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     user.is_active = True

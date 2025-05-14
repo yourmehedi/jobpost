@@ -1,7 +1,7 @@
 {% extends 'management/base_admin.html' %}
 
 {% block content %}
-<h3>All Job Posts</h3>
+<h3 class="mb-3">All Job Posts</h3>
 
 {% if jobs %}
 <table class="table table-striped table-bordered">
@@ -10,6 +10,7 @@
             <th>Title</th>
             <th>Employer</th>
             <th>Status</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -33,6 +34,19 @@
                 {% else %}
                     <span class="badge bg-warning">Unknown</span>
                 {% endif %}
+            </td>
+            <td>
+                <!-- Review button -->
+                <a href="{% url 'review_user_jobs' job.employer.id %}" class="btn btn-sm btn-info mb-1">Review</a>
+
+                <!-- Toggle Status -->
+                <a href="{% url 'toggle_job_status' job.id %}" class="btn btn-sm btn-warning mb-1">
+                    {% if job.status == 'active' %}Deactivate{% else %}Activate{% endif %}
+                </a>
+
+                <!-- Delete button -->
+                <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Are you sure you want to delete this job?');">Delete</a>
             </td>
         </tr>
         {% endfor %}

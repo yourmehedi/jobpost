@@ -1,25 +1,23 @@
-from django.contrib.auth import get_user_model
-from django.contrib.sites.shortcuts import get_current_site
+# accounts/views.py
+
+from django.contrib.auth import authenticate, login as signin, logout, get_user_model
 from django.shortcuts import render, redirect
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.contrib.auth import authenticate, login as signin, logout
-from django.template.loader import render_to_string
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.contrib import messages
-from django.urls import reverse
+from .models import Employer
+from django.db import transaction
+from jobseekers .models import Jobseeker
 
 User = get_user_model()
-
+@transaction.atomic
 def register(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
+        user_type = request.POST.get('user_type')  # 'jobseeker' or 'employer'
 
-        if not all([username, email, password, confirm_password]):
+        if not all([username, email, password, confirm_password, user_type]):
             messages.error(request, 'All fields are required.')
         elif password != confirm_password:
             messages.error(request, 'Passwords do not match.')
@@ -28,15 +26,37 @@ def register(request):
         elif User.objects.filter(email=email).exists():
             messages.error(request, 'Email already registered.')
         else:
-            User.objects.create_user(username=username, email=email, password=password)
+            # Create the user
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                user_type=user_type
+            )
+
+            # Create Employer or Jobseeker profile
+            if user_type == 'employer':
+                employer_type = request.POST.get('employer_type')  # e.g. 'direct'
+                company_name = request.POST.get('company_name')
+                tin = request.POST.get('tin')
+
+                Employer.objects.create(
+                    user=user,
+                    employer_type=employer_type,
+                    company_name=company_name,
+                    tin=tin
+                )
+
+            elif user_type == 'jobseeker':
+                Jobseeker.objects.create(user=user, full_name=username)
+
             messages.success(request, 'Registration successful! Please login.')
-            return redirect('accounts:login')  
+            return redirect('accounts:login')
 
     return render(request, 'accounts/register.html')
 
 def login(request):
     message = None
-
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -45,23 +65,22 @@ def login(request):
             user = authenticate(request, username=username, password=password)
             if user:
                 signin(request, user)
-                return redirect('management:home')  
+                if user.user_type == 'jobseeker':
+                    return redirect('jobseeker:dashboard')
+                elif user.user_type == 'employer':
+                    return redirect('employer:dashboard')
+                else:
+                    return redirect('superadmin:dashboard')
             else:
                 message = 'Invalid username or password'
         else:
             message = 'Username and password are required'
-        return render(request, 'management/home.html', {'message': message})
-    
-    context = {
-        'message': message,
-    }
 
-    return render(request, 'accounts/login.html', context)
+    return render(request, 'accounts/login.html', {'message': message})
 
 def user_profile(request):
-
     return render(request, 'accounts/profile.html')
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('accounts:login')

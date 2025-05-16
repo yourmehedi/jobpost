@@ -1,25 +1,30 @@
+# accounts/admin.py
+
 from django.contrib import admin
-from .models import Employer
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser, Employer
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+    list_display = ('username', 'email', 'user_type', 'is_verified', 'is_active', 'is_superuser')
+    list_filter = ('user_type', 'is_verified', 'is_superuser', 'is_active')
+    search_fields = ('username', 'email')
+    fieldsets = (
+        (None, {'fields': ('username', 'email', 'password')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('User Type Info', {'fields': ('user_type', 'is_verified', 'is_approved')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'user_type', 'password1', 'password2'),
+        }),
+    )
+    ordering = ('email',)
 
 @admin.register(Employer)
 class EmployerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'employer_type', 'is_approved')
+    list_display = ('user', 'company_name', 'employer_type', 'tin', 'is_approved')
     list_filter = ('employer_type', 'is_approved')
-    actions = ['approve_selected']
-
-    def approve_selected(self, request, queryset):
-        queryset.update(is_approved=True)
-
-# accounts/admin.py
-from django.contrib import admin
-from .models import CustomUser
-
-@admin.register(CustomUser)
-class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_approved', 'is_staff')
-    list_filter = ('is_approved', 'is_staff')
-    actions = ['approve_users']
-
-    def approve_users(self, request, queryset):
-        queryset.update(is_approved=True)
-    approve_users.short_description = "Approve selected users"
+    search_fields = ('company_name', 'user__username', 'user__email')

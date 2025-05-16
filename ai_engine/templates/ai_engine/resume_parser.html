@@ -1,0 +1,22 @@
+<!-- templates/ai_engine/resume_parser.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-10 p-6 bg-white rounded shadow">
+  <h2 class="text-2xl font-bold mb-4">AI Resume Parser</h2>
+
+  <form method="POST">
+    {% csrf_token %}
+    <textarea name="resume_text" rows="10" class="w-full border p-3 rounded" placeholder="Paste resume text here..."></textarea>
+    <button type="submit" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded">Parse with AI</button>
+  </form>
+
+  {% if parsed_data %}
+    <div class="mt-6">
+      <h3 class="text-xl font-semibold mb-2">Parsed Resume Info:</h3>
+      <pre class="bg-gray-100 p-4 rounded whitespace-pre-wrap">{{ parsed_data }}</pre>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

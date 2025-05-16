@@ -1,5 +1,7 @@
 
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.conf import settings
 from django.utils import timezone
 
@@ -21,3 +23,12 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.employer} - {self.plan}"
+
+@receiver(post_save, sender=Subscription)
+def update_user_ai_access(sender, instance, **kwargs):
+    user = instance.employer
+    if instance.active:
+        user.has_ai_access = instance.plan.has_ai_access
+    else:
+        user.has_ai_access = False
+    user.save()

@@ -74,3 +74,10 @@ class AdditionalInfo(models.Model):
     about_me = models.TextField(blank=True, null=True)
     achievements = models.TextField(blank=True, null=True)
     hobbies = models.TextField(blank=True, null=True)
+
+@property
+def age(self):
+    from datetime import date
+    if self.date_of_birth:
+        return date.today().year - self.date_of_birth.year
+    return None

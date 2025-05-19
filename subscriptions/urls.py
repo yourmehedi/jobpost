@@ -5,5 +5,5 @@ app_name = 'subscriptions'
 
 urlpatterns = [
     path('plans/', views.plan_list, name='plan_list'),
-      path('purchase/<int:plan_id>/', views.purchase_plan, name='purchase_plan'),
+    path('purchase/<int:plan_id>/', views.purchase_plan, name='purchase_plan'),
 ]

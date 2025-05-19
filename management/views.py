@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import user_passes_test
 User = get_user_model()
 
 
+
 def home(request):
     return render(request, 'management/home.html')
 

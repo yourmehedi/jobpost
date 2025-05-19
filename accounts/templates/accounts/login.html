@@ -4,25 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --primary-color: #007BFF;
+      --primary-hover: #0056b3;
+      --gradient-start: #74ebd5;
+      --gradient-end: #ACB6E5;
     }
-
+    
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(120deg, #74ebd5, #ACB6E5);
+      background: linear-gradient(120deg, var(--gradient-start), var(--gradient-end));
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
     }
 
     .login-container {
       background-color: #fff;
-      padding: 40px 30px;
+      padding: 2.5rem;
       border-radius: 16px;
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
       width: 100%;
@@ -34,92 +41,169 @@
       transform: translateY(-5px);
     }
 
-    .login-container h2 {
+    .login-title {
       text-align: center;
-      font-size: 32px;
+      font-size: 2rem;
       color: #333;
-      margin-bottom: 30px;
+      margin-bottom: 1.8rem;
       font-weight: 600;
     }
 
-    .login-container input[type="text"],
-    .login-container input[type="password"] {
-      width: 100%;
-      padding: 14px 16px;
-      margin-bottom: 22px;
-      border: 1px solid #ccc;
+    .form-control {
+      padding: 0.875rem 1rem;
+      margin-bottom: 1.4rem;
       border-radius: 10px;
-      font-size: 16px;
       background-color: #f9f9f9;
-      transition: border-color 0.3s, box-shadow 0.3s;
+      transition: all 0.3s;
     }
 
-    .login-container input:focus {
-      outline: none;
-      border-color: #007BFF;
-      box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.15);
       background-color: #fff;
     }
 
-    .login-container button {
-      width: 100%;
-      padding: 14px;
-      background-color: #007BFF;
-      color: white;
+    .btn-primary {
+      background-color: var(--primary-color);
       border: none;
       border-radius: 10px;
-      font-size: 17px;
+      padding: 0.875rem;
       font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s;
+      transition: all 0.3s;
     }
 
-    .login-container button:hover {
-      background-color: #0056b3;
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
       transform: scale(1.02);
     }
 
-    .login-container p {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 15px;
-      color: #333;
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: #666;
     }
 
-    .login-container p a {
-      color: #007BFF;
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .divider::before {
+      margin-right: 1rem;
+    }
+
+    .divider::after {
+      margin-left: 1rem;
+    }
+
+    .social-login {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn-social {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .btn-social i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .btn-google {
+      background-color: #fff;
+      color: #757575;
+      border: 1px solid #ddd;
+    }
+
+    .btn-google:hover {
+      background-color: #f8f9fa;
+      color: #757575;
+      border-color: #ddd;
+    }
+
+    .btn-facebook {
+      background-color: #3b5998;
+      color: white;
+      border: none;
+    }
+
+    .btn-facebook:hover {
+      background-color: #344e86;
+      color: white;
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .signup-link a {
+      color: var(--primary-color);
       text-decoration: none;
       font-weight: 500;
     }
 
-    .login-container p a:hover {
+    .signup-link a:hover {
       text-decoration: underline;
     }
 
     .error-message {
-      color: red;
+      color: #dc3545;
       text-align: center;
-      margin-top: 10px;
-      font-size: 14px;
+      margin-top: 1rem;
+      font-size: 0.875rem;
     }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <h2>Login</h2>
+    <h2 class="login-title">Login</h2>
 
-    <form method="POST">
-        {% csrf_token %}
-        <input type="text" name="username" placeholder="Username" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
-        <button type="submit">Login</button>
+    <form method="POST" action="{% url 'accounts:login' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <input type="text" class="form-control" name="username" placeholder="Username" required>
+      </div>
+      <div class="mb-3">
+        <input type="password" class="form-control" name="password" placeholder="Password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
     
-    <p>OR</p>
+    <div class="divider">OR</div>
     
-    <a href="#">Login with Google</a><br>
-    <a href="#">Login with Facebook</a>
+    <div class="social-login">
+      <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-social btn-google">
+        <i class="fab fa-google"></i> Login with Google
+      </a>
+      <a href="#" class="btn btn-social btn-facebook">
+        <i class="fab fa-facebook-f"></i> Login with Facebook
+      </a>
+    </div>
     
+    <div class="signup-link">
+      Don't have an account? <a href="#">Sign up</a>
+    </div>
+    
+    <!-- Error message placeholder -->
+    <div class="error-message">
+      <!-- Error messages will appear here -->
+    </div>
   </div>
+
+  <!-- Bootstrap 5 JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

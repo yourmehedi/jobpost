@@ -26,7 +26,8 @@ class Job(models.Model):
     ('closed', 'Closed'),
     ('expired', 'Expired'),
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+
 
 
     employer = models.ForeignKey(Employer, on_delete=models.CASCADE, null=True, blank=True)

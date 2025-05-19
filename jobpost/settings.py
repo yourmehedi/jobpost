@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
+    'social_django',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -62,10 +63,14 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
-AUTHENTICATION_BACKENDS = [
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',  
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
+)
+
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '351767731770-ctuh90cr8qmktfcl21na0g274pc91pmo.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
 
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
@@ -87,7 +92,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
+
+
+
 
 ROOT_URLCONF = 'jobpost.urls'
 
@@ -159,9 +168,6 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For testing
 DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
 
-LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/accounts/login/' 
-LOGOUT_REDIRECT_URL = '/login/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

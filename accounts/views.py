@@ -1,13 +1,14 @@
 # accounts/views.py
 
-from django.contrib.auth import authenticate, login as signin, logout, get_user_model
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Employer
 from django.db import transaction
-from jobseekers .models import Jobseeker
+from jobseekers.models import Jobseeker
 
 User = get_user_model()
+
 @transaction.atomic
 def register(request):
     if request.method == 'POST':
@@ -55,7 +56,7 @@ def register(request):
 
     return render(request, 'accounts/register.html')
 
-def login(request):
+def login_view(request):  # ✅ NOT `login`
     message = None
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -64,13 +65,13 @@ def login(request):
         if username and password:
             user = authenticate(request, username=username, password=password)
             if user:
-                signin(request, user)
+                login(request, user)  # ✅ Django's built-in login
                 if user.user_type == 'jobseeker':
                     return redirect('jobseeker:dashboard')
                 elif user.user_type == 'employer':
                     return redirect('employer:dashboard')
                 else:
-                    return redirect('superadmin:dashboard')
+                    return redirect('management:home')
             else:
                 message = 'Invalid username or password'
         else:
@@ -80,6 +81,7 @@ def login(request):
 
 def user_profile(request):
     return render(request, 'accounts/profile.html')
+
 
 def logout_view(request):
     logout(request)

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Company, Job, JobPost, JobApplication
+from .models import *
 from django.contrib import messages
 from .utils import get_employer_limits
 from accounts.models import Employer
@@ -11,98 +11,93 @@ from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 
-@login_required
+
 def post_job(request):
     message = None
     companies = Company.objects.all()
 
     if request.method == 'POST':
         try:
-            try:
-                employer = request.user.employer  
-            except Employer.DoesNotExist:
-                message = "You must have an employer account to post a job."
-                return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
+            employer = request.user.management_employer
+        except AttributeError:
+            message = "You must have an employer account to post a job."
+            return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
-            title = request.POST.get('jobTitle')
-            company_name = request.POST.get('companyName')
-            description = request.POST.get('jobDescription')
-            location = request.POST.get('l')
-            formatted_address = request.POST.get('formattedAddress')
-            salary = request.POST.get('salary')
-            is_email_protected = request.POST.get('anonymizeEmail') == 'on'
-            skills = request.POST.get('skills')
-            tech_stack = ', '.join(request.POST.getlist('stack'))
+        # Field extraction
+        title = request.POST.get('jobTitle')
+        company_name = request.POST.get('companyName')
+        description = request.POST.get('jobDescription')
+        location = request.POST.get('l')
+        formatted_address = request.POST.get('formattedAddress')
+        salary = request.POST.get('salary')
+        is_email_protected = request.POST.get('anonymizeEmail') == 'on'
+        skills = request.POST.get('skills')
+        tech_stack = ', '.join(request.POST.getlist('stack'))
 
-            try:
-                vacancies = int(request.POST.get('vacancies'))
-            except (TypeError, ValueError):
-                vacancies = 1
+        try:
+            vacancies = int(request.POST.get('vacancies'))
+        except (TypeError, ValueError):
+            vacancies = 1
 
-            expiry_date_str = request.POST.get('expiry')
-            try:
-                expiry_date = datetime.strptime(expiry_date_str, "%Y-%m-%d").date() if expiry_date_str else None
-            except ValueError:
-                expiry_date = None
+        expiry_date_str = request.POST.get('expiry')
+        try:
+            expiry_date = datetime.strptime(expiry_date_str, "%Y-%m-%d").date() if expiry_date_str else None
+        except ValueError:
+            expiry_date = None
 
-            valid_passport = request.POST.get('valid_passport') == 'on'
-            principal = request.POST.get('principal')
-            job_role = request.POST.get('job_role')
-            experience_level = request.POST.get('experience')
-            job_type = request.POST.get('job_type')
-            industry = request.POST.get('industry')
+        valid_passport = request.POST.get('valid_passport') == 'on'
+        principal = request.POST.get('principal')
+        job_role = request.POST.get('job_role')
+        experience_level = request.POST.get('experience')
+        job_type = request.POST.get('job_type')
+        industry = request.POST.get('industry')
+        street = request.POST.get('street')
+        city = request.POST.get('city')
+        province = request.POST.get('province')
+        zip_code = request.POST.get('zip')
+        country = request.POST.get('country')
+        english_required = request.POST.get('english_required') == 'on'
 
-            street = request.POST.get('street')
-            city = request.POST.get('city')
-            province = request.POST.get('province')
-            zip_code = request.POST.get('zip')
-            country = request.POST.get('country')
-            english_required = request.POST.get('english_required') == 'on'
+        # Validation
+        required_fields = [title, company_name, description, location]
+        if not all(required_fields):
+            message = "Please fill in all required fields."
+            return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
-            required_fields = [title, company_name, description, location]
-            if not all(required_fields):
-                message = "Please fill in all required fields."
-            else:
-                company, _ = Company.objects.get_or_create(name=company_name)
+        # Save Job
+        company, _ = Company.objects.get_or_create(name=company_name)
 
-                Job.objects.create(
-                    title=title,
-                    company=company,
-                    employer=employer,  
-                    description=description,
-                    location=location,
-                    formatted_address=formatted_address,
-                    salary=salary,
-                    is_email_protected=is_email_protected,
-                    skills=skills,
-                    tech_stack=tech_stack,
-                    vacancies=vacancies,
-                    expiry_date=expiry_date,
-                    valid_passport=valid_passport,
-                    principal=principal,
-                    job_role=job_role,
-                    experience_level=experience_level,
-                    job_type=job_type,
-                    industry=industry,
-                    street=street,
-                    city=city,
-                    province=province,
-                    zip_code=zip_code,
-                    country=country,
-                    english_required=english_required
-                )
+        Job.objects.create(
+            title=title,
+            company=company,
+            employer=employer,
+            description=description,
+            location=location,
+            formatted_address=formatted_address,
+            salary=salary,
+            is_email_protected=is_email_protected,
+            skills=skills,
+            tech_stack=tech_stack,
+            vacancies=vacancies,
+            expiry_date=expiry_date,
+            valid_passport=valid_passport,
+            principal=principal,
+            job_role=job_role,
+            experience_level=experience_level,
+            job_type=job_type,
+            industry=industry,
+            street=street,
+            city=city,
+            province=province,
+            zip_code=zip_code,
+            country=country,
+            english_required=english_required,
+            posted_by=request.user  # Optional: remove if not used
+        )
 
-                return redirect('jobs:job_post_success')
+        return redirect('jobs:job_post_success')
 
-        except Exception as e:
-            message = f"An error occurred: {e}"
-
-    context = {
-        'companies': companies,
-        'message': message,
-    }
-    return render(request, 'jobs/post_job.html', context)
-
+    return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
 def job_post_success(request):
     return render(request, 'jobs/job_success.html')

@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from accounts.models import CustomUser
 
 
 EMPLOYER_TYPE_CHOICES = [
@@ -18,7 +19,7 @@ APPROVAL_STATUS_CHOICES = [
 ]
 
 class Employer(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='management_employer')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='management_employer')
     company_name = models.CharField(max_length=255)
     company_website = models.URLField(blank=True, null=True)
     employer_type = models.CharField(max_length=20, choices=EMPLOYER_TYPE_CHOICES)

@@ -28,7 +28,9 @@
             {% if job.salary %}
               <p class="fw-bold text-success">₱{{ job.salary }}</p>
             {% endif %}
-            <p class="mb-1"><span class="text-success fw-bold">●</span> {{ job.company.name }} · <a href="{% url 'jobs:job_detail' job.id %}">View Job</a></p>
+            <p class="mb-1"><span class="text-success fw-bold">●</span> {{ job.company.name }} · 
+              <a href="{% url 'jobs:job_detail' job.id %}">View Job</a>
+            </p>
             <p class="mb-1">{{ job.city }}, {{ job.province }}</p>
 
             {% if job.skill_list %}
@@ -44,6 +46,20 @@
                 {% for perk in job.perk_list %}
                   <span class="badge bg-light border me-1 text-dark">{{ perk }}</span>
                 {% endfor %}
+              </p>
+            {% endif %}
+
+            {% if job.match_score is not None %}
+              <p class="mb-0">
+                <span class="badge bg-success">
+                  ✅ Match Score: {{ job.match_score }}%
+                </span>
+              </p>
+            {% else %}
+              <p class="mb-0">
+                <span class="badge bg-warning text-dark">
+                  No Resume Match Found
+                </span>
               </p>
             {% endif %}
           </div>
@@ -70,6 +86,7 @@
       <p>No jobs found.</p>
     {% endfor %}
   </div>
+
   <!-- Pagination Controls -->
   <nav>
     <ul class="pagination justify-content-center">
@@ -104,4 +121,5 @@
   </nav>
 
 </body>
+
 </html>

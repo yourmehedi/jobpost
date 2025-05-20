@@ -1,5 +1,4 @@
 # accounts/models.py
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
@@ -28,7 +27,7 @@ class Employer(models.Model):
         ('agency_local', 'Local Agency'),
         ('agency_overseas', 'Overseas Agency'),
     ]
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='employer_profile')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='employer_profile')
     employer_type = models.CharField(max_length=20, choices=EMPLOYER_TYPE_CHOICES)
     company_name = models.CharField(max_length=255)
     bir_2303 = models.FileField(upload_to='documents/', blank=True, null=True)

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume List</title>
+</head>
+<body>
+    <h2>Your Uploaded Resumes</h2>
+<ul>
+  {% for resume in resumes %}
+    <li>{{ resume.full_name }} - {{ resume.uploaded_at }}</li>
+  {% endfor %}
+</ul>
+
+</body>
+</html>

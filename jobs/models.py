@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from accounts.models import CustomUser
 User = get_user_model()
+from accounts.models import CustomUser
 from management.models import Employer
 from django.utils import timezone
 

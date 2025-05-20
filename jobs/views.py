@@ -10,7 +10,13 @@ from .models import JobApplication
 from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
+from resumes.models import Resume  
+from jobs.utils import calculate_match_score
+from subscriptions.models import Subscription
 
+def has_valid_ai_token(user):
+    sub = Subscription.objects.filter(employer=user, active=True).first()
+    return sub and sub.ai_tokens > 0
 
 def post_job(request):
     message = None
@@ -104,8 +110,14 @@ def job_post_success(request):
 
 @login_required(login_url='accounts:login') 
 def job_list(request):
+
+    # if not has_valid_ai_token(request.user):
+    #     messages.error(request, "You have no AI tokens left. Please upgrade your plan to continue using AI-based matching.")
+    #     return redirect('employers:dashboard')
+    
     query = request.GET.get('q', '')
     job_queryset = Job.objects.select_related('company').order_by('-posted_at')
+    subscription = Subscription.objects.filter(employer=request.user, active=True).first()
 
     if query:
         job_queryset = job_queryset.filter(
@@ -113,11 +125,22 @@ def job_list(request):
             Q(company__name__icontains=query)
         )
 
+    # ✅ ইউজারের সর্বশেষ রিজিউম ডেটা আনো
+    user_resume = Resume.objects.filter(user=request.user).order_by('-uploaded_at').first()
+    resume_skills = user_resume.skills if user_resume else ''
+    resume_experience = user_resume.experience if user_resume else ''
+
+    # ✅ প্রতিটি জব এর সাথে Matching স্কোর যুক্ত করো
     for job in job_queryset:
         job.skill_list = job.skills.split(",") if job.skills else []
         job.perk_list = job.perks.split(",") if job.perks else []
 
-    # Pagination: 5 jobs per page
+        if resume_skills:
+            job.match_score = calculate_match_score(job.skills, resume_skills, resume_experience)
+        else:
+            job.match_score = None
+
+    # Pagination: 8 jobs per page
     paginator = Paginator(job_queryset, 8)
     page_number = request.GET.get('page')
     jobs = paginator.get_page(page_number)
@@ -125,8 +148,8 @@ def job_list(request):
     return render(request, 'jobs/job_list.html', {
         'jobs': jobs,
         'query': query,
+        'user_subscription': subscription
     })
-
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)
@@ -150,7 +173,6 @@ def apply(request, job_id):
         return render(request, 'jobs/apply_success.html', {'job': job})
 
     return render(request, 'jobs/apply.html', {'job': job})
-
 
 @staff_member_required
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
@@ -188,4 +210,8 @@ def create_job(request):
         messages.error(request, "You have reached your job posting limit.")
         return redirect('upgrade_page')  # Optional
 
-
+def consume_user_token(user):
+    subscription = Subscription.objects.filter(employer=user, active=True).first()
+    if subscription and subscription.consume_token():
+        return True
+    return False

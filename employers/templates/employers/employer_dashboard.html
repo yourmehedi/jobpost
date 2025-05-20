@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Dashboard</title>
+</head>
+<body>
+    <h2>Employer Dashboard</h2>
+<p><strong>Company Name:</strong> {{ profile.company_name }}</p>
+
+{% if subscription %}
+  <p><strong>Active Plan:</strong> {{ subscription.plan.name }}</p>
+  <p><strong>AI Tokens:</strong> {{ subscription.ai_tokens }}</p>
+
+  {% if subscription.ai_tokens > 0 %}
+    <p><span style="color: green;">✅ AI features are active.</span></p>
+  {% else %}
+    <p><span style="color: red;">⚠️ No AI tokens left. Upgrade your plan or wait for renewal.</span></p>
+  {% endif %}
+
+{% else %}
+  <p><strong>No active subscription.</strong></p>
+{% endif %}
+
+
+</body>
+</html>

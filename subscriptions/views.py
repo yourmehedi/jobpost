@@ -3,20 +3,24 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
-
 from .models import Plan, Subscription
 from accounts.models import CustomUser
 
+@login_required
 def plan_list(request):
     weekly_plans = Plan.objects.filter(duration='week')
     monthly_plans = Plan.objects.filter(duration='month')
     yearly_plans = Plan.objects.filter(duration='year')
 
+    user_subscription = Subscription.objects.filter(employer=request.user, active=True).first()
+
     return render(request, 'plan/plan_list.html', {
         'weekly_plans': weekly_plans,
         'monthly_plans': monthly_plans,
         'yearly_plans': yearly_plans,
+        'user_subscription': user_subscription,
     })
+
 
 
 @login_required

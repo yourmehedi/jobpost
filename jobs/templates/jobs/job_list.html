@@ -48,7 +48,11 @@
                 {% endfor %}
               </p>
             {% endif %}
-
+            <h5>
+              {% if user_subscription %}
+                <p>Available AI Tokens: {{ user_subscription.ai_tokens }}xx</p>
+              {% endif %}
+            </h5>
             {% if job.match_score is not None %}
               <p class="mb-0">
                 <span class="badge bg-success">
@@ -81,6 +85,7 @@
           </a>
         </div>
       </div>
+
     </div>
     {% empty %}
       <p>No jobs found.</p>

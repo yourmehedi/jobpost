@@ -1,22 +1,275 @@
-<!-- templates/ai_engine/resume_parser.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+  /* Base styles */
+  .max-w-2xl {
+    max-width: 42rem;
+  }
+  
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .my-10 {
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .p-6 {
+    padding: 1.5rem;
+  }
+  
+  .bg-white {
+    background-color: #fff;
+  }
+  
+  .rounded {
+    border-radius: 0.25rem;
+  }
+  
+  .shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Text styles */
+  .text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  .font-bold {
+    font-weight: 700;
+  }
+  
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+  
+  .text-blue-800 {
+    color: #1e40af;
+  }
+  
+  /* Form styles */
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+  
+  .block {
+    display: block;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .font-medium {
+    font-weight: 500;
+  }
+  
+  .text-gray-700 {
+    color: #374151;
+  }
+  
+  /* Textarea styles */
+  .w-full {
+    width: 100%;
+  }
+  
+  .border {
+    border-width: 1px;
+  }
+  
+  .border-gray-300 {
+    border-color: #d1d5db;
+  }
+  
+  .px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .focus\:outline-none:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  
+  .focus\:ring-2:focus {
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+  }
+  
+  .focus\:ring-blue-500:focus {
+    --tw-ring-opacity: 1;
+    --tw-ring-color: rgba(59, 130, 246, var(--tw-ring-opacity));
+  }
+  
+  /* Button styles */
+  .bg-blue-700 {
+    background-color: #1d4ed8;
+  }
+  
+  .hover\:bg-blue-800:hover {
+    background-color: #1e40af;
+  }
+  
+  .text-white {
+    color: #fff;
+  }
+  
+  .px-5 {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  
+  .transition {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+  
+  /* Results section */
+  .mt-8 {
+    margin-top: 2rem;
+  }
+  
+  .text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  .font-semibold {
+    font-weight: 600;
+  }
+  
+  .text-green-700 {
+    color: #15803d;
+  }
+  
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .bg-gray-50 {
+    background-color: #f9fafb;
+  }
+  
+  .border-green-200 {
+    border-color: #bbf7d0;
+  }
+  
+  .shadow-inner {
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  }
+  
+  .whitespace-pre-wrap {
+    white-space: pre-wrap;
+  }
+  
+  /* Custom animations */
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .p-6 {
+      padding: 1rem;
+    }
+    .text-2xl {
+      font-size: 1.25rem;
+    }
+  }
+  
+  /* Loading state for the button */
+  .button-loading {
+    position: relative;
+    pointer-events: none;
+  }
 
-{% extends "base.html" %}
+  .button-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    border: 3px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: button-loading-spinner 1s ease infinite;
+  }
 
-{% block content %}
+  @keyframes button-loading-spinner {
+    from {
+      transform: rotate(0turn);
+    }
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  /* Smooth transitions for the results section */
+  .results-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .results-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+</style>
+</head>
+<body>
+  
 <div class="max-w-2xl mx-auto my-10 p-6 bg-white rounded shadow">
-  <h2 class="text-2xl font-bold mb-4">AI Resume Parser</h2>
+  <h2 class="text-2xl font-bold mb-4 text-blue-800">AI Resume Parser</h2>
 
-  <form method="POST">
+  <form method="POST" class="space-y-4">
     {% csrf_token %}
-    <textarea name="resume_text" rows="10" class="w-full border p-3 rounded" placeholder="Paste resume text here..."></textarea>
-    <button type="submit" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded">Parse with AI</button>
+    <label for="resume_text" class="block text-sm font-medium text-gray-700">Paste Resume Text:</label>
+    <textarea id="resume_text" name="resume_text" rows="12" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste resume content here..."></textarea>
+
+    <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded transition duration-200">
+      🔍 Parse with AI
+    </button>
   </form>
 
   {% if parsed_data %}
-    <div class="mt-6">
-      <h3 class="text-xl font-semibold mb-2">Parsed Resume Info:</h3>
-      <pre class="bg-gray-100 p-4 rounded whitespace-pre-wrap">{{ parsed_data }}</pre>
+    <div class="mt-8">
+      <h3 class="text-lg font-semibold text-green-700 mb-2">✅ Parsed Resume Info:</h3>
+      <div class="bg-gray-50 border border-green-200 p-4 rounded shadow-inner text-sm whitespace-pre-wrap">
+        {{ parsed_data }}
+      </div>
     </div>
   {% endif %}
 </div>
-{% endblock %}
+
+
+</body>
+</html>

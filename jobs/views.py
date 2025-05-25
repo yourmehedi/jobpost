@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+import random
 from .models import *
 from django.contrib import messages
 from .utils import get_employer_limits
@@ -215,3 +217,29 @@ def consume_user_token(user):
     if subscription and subscription.consume_token():
         return True
     return False
+
+
+@login_required
+def generate_job_description(request):
+    if request.method == 'POST':
+        if not has_valid_ai_token(request.user):
+            return JsonResponse({'error': 'No AI tokens left.'}, status=403)
+
+        title = request.POST.get('title', '')
+        job_role = request.POST.get('role', '')
+        industry = request.POST.get('industry', '')
+
+        if not title:
+            return JsonResponse({'error': 'Title is required'}, status=400)
+
+        # ✅ Demo AI response (ভবিষ্যতে OpenAI বা LLM সংযুক্ত হবে)
+        description = f"""
+        We are looking for a passionate {title} to join our {industry or 'forward-thinking'} team.
+        As a {job_role or title}, you'll be responsible for developing innovative solutions,
+        collaborating with cross-functional teams, and driving product excellence.
+        """
+
+        # Optional: Token consume করো
+        consume_user_token(request.user)
+
+        return JsonResponse({'description': description.strip()})

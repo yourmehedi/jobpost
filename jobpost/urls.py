@@ -8,13 +8,15 @@ urlpatterns = [
     path('', include('management.urls')),
     path('accounts/', include('accounts.urls')),
     path('social/', include('allauth.urls')),
-    path('auth/', include('social_django.urls', namespace='social')),     
+    path('auth/', include('social_django.urls', namespace='social')), 
+    path('chatbot/', include('chatbot.urls')),     
     path('employers/', include('employers.urls')),
     path('jobs/', include('jobs.urls')),
     path('jobseekers/', include('jobseekers.urls')),
     path('ai_engine/', include('ai_engine.urls')),
     path('subscriptions', include('subscriptions.urls')),
     path('resumes/', include('resumes.urls')),
+    
 ]
 
 

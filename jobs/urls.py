@@ -5,6 +5,7 @@ from .views import *
 app_name = 'jobs'
 
 urlpatterns = [
+    path('generate-description/', views.generate_job_description, name='generate_description'),
     path('post_job/', views.post_job, name='post_job'),
     path('job-post-success/', job_post_success, name='job_post_success'),
     path('list/', views.job_list, name='job_list'),

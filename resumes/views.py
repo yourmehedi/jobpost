@@ -10,6 +10,7 @@ from .utils import (
 )
 from jobseekers.models import Jobseeker
 from datetime import datetime
+from moderation.utils import moderate_text  # ✅ Import moderation
 
 @login_required
 def upload_resume(request):
@@ -22,6 +23,9 @@ def upload_resume(request):
         try:
             # ✅ Resume text extract
             text = textract.process(file_path).decode('utf-8')
+
+            # ✅ Run moderation filter before extraction
+            text = moderate_text(text)
 
             # ✅ Extracted data from AI/parser
             full_name = extract_name(text)
@@ -72,7 +76,6 @@ def upload_resume(request):
 
     return render(request, 'resumes/upload.html')
 
-
 def resume_list(request):
-    resumes = Resume.objects.filter(user=request.user)
-    return render(request, 'resumes/resume_list.html', {'resumes': resumes})
+
+    return render(request, 'resumes/resume_list.html')

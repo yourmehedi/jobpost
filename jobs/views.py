@@ -13,6 +13,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from resumes.models import Resume  
+from moderation.utils import moderate_text
 from jobs.utils import calculate_match_score
 from subscriptions.models import Subscription
 
@@ -20,6 +21,7 @@ def has_valid_ai_token(user):
     sub = Subscription.objects.filter(employer=user, active=True).first()
     return sub and sub.ai_tokens > 0
 
+@login_required
 def post_job(request):
     message = None
     companies = Company.objects.all()
@@ -66,30 +68,37 @@ def post_job(request):
         country = request.POST.get('country')
         english_required = request.POST.get('english_required') == 'on'
 
-        # Validation
+        # ✅ Validation
         required_fields = [title, company_name, description, location]
         if not all(required_fields):
             message = "Please fill in all required fields."
             return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
-        # Save Job
-        company, _ = Company.objects.get_or_create(name=company_name)
+        # ✅ Clean/filter text fields
+        clean_description = moderate_text(description)
+        clean_skills = moderate_text(skills)
+        clean_principal = moderate_text(principal)
+        clean_title = moderate_text(title)
+        clean_company_name = moderate_text(company_name)
+
+        # ✅ Save Job
+        company, _ = Company.objects.get_or_create(name=clean_company_name)
 
         Job.objects.create(
-            title=title,
+            title=clean_title,
             company=company,
             employer=employer,
-            description=description,
+            description=clean_description,
             location=location,
             formatted_address=formatted_address,
             salary=salary,
             is_email_protected=is_email_protected,
-            skills=skills,
+            skills=clean_skills,
             tech_stack=tech_stack,
             vacancies=vacancies,
             expiry_date=expiry_date,
             valid_passport=valid_passport,
-            principal=principal,
+            principal=clean_principal,
             job_role=job_role,
             experience_level=experience_level,
             job_type=job_type,
@@ -100,12 +109,15 @@ def post_job(request):
             zip_code=zip_code,
             country=country,
             english_required=english_required,
-            posted_by=request.user  # Optional: remove if not used
+            posted_by=request.user
         )
 
         return redirect('jobs:job_post_success')
 
-    return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
+    return render(request, 'jobs/post_job.html', {
+        'companies': companies,
+        'message': message
+    })
 
 def job_post_success(request):
     return render(request, 'jobs/job_success.html')
@@ -147,7 +159,7 @@ def job_list(request):
     page_number = request.GET.get('page')
     jobs = paginator.get_page(page_number)
 
-    return render(request, 'jobs/job_list.html', {
+    return render(request, 'core_ui/core_ui_base.html', {
         'jobs': jobs,
         'query': query,
         'user_subscription': subscription

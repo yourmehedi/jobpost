@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'ai_engine',
     'plan',
     'chatbot',
+    'core_ui',
+    'moderation',
 
 ]
 
@@ -114,6 +116,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'management.context_processors.current_year',
+                'core_ui.context_processors.current_year',
             ],
             
         },
@@ -176,7 +179,9 @@ DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
 
 
 
-STATIC_URL = 'static/'
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

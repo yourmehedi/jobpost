@@ -50,7 +50,7 @@
             {% endif %}
             <h5>
               {% if user_subscription %}
-                <p>Available AI Tokens: {{ user_subscription.ai_tokens }}xx</p>
+                <p>Available AI Tokens: {{ user_subscription.ai_tokens }}</p>
               {% endif %}
             </h5>
             {% if job.match_score is not None %}
@@ -85,7 +85,7 @@
           </a>
         </div>
       </div>
-
+      {% include 'includes/chatbot_widget.html' %}
     </div>
     {% empty %}
       <p>No jobs found.</p>

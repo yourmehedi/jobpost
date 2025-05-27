@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations</title>
+</head>
+<body>
+    {% block content %}
+    <div class="max-w-5xl mx-auto p-6">
+    <h2 class="text-xl font-bold mb-6">Recommended Jobs for You</h2>
+
+    {% if recommended_jobs %}
+        <ul class="space-y-4">
+        {% for job in recommended_jobs %}
+            <li class="border rounded p-4 shadow bg-white">
+            <h3 class="text-lg font-semibold">{{ job.title }}</h3>
+            <p><strong>Company:</strong> {{ job.company.name }}</p>
+            <p><strong>Match Score:</strong> {{ job.match_score }}%</p>
+            <p><strong>Location:</strong> {{ job.city }}, {{ job.country }}</p>
+            <p class="mt-2">{{ job.description|truncatewords:25 }}</p>
+            <a href="{% url 'jobs:job_detail' job.id %}" class="text-blue-600 mt-2 inline-block">View Job</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No job matches found based on your profile. Try updating your resume or preferences.</p>
+    {% endif %}
+    </div>
+    {% endblock %}
+</body>
+</html>

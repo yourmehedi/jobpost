@@ -1,4 +1,6 @@
 import re
+import openai
+from django.conf import settings
 
 def extract_email(text):
     match = re.search(r'[\w\.-]+@[\w\.-]+', text)
@@ -44,3 +46,30 @@ def generate_tags(skills, experience):
     if experience:
         exp_tags = [kw for kw in ['intern', 'manager', 'developer', 'trainer', 'engineer'] if kw in experience.lower()]
     return ', '.join(set(skill_tags + exp_tags))
+
+def ai_generate_tags(text: str) -> str:
+    """
+    Use OpenAI to generate comma-separated tags from resume text.
+    Output: e.g., "Python, Django, Backend Developer, Healthcare"
+    """
+    try:
+        openai.api_key = settings.OPENAI_API_KEY
+
+        prompt = (
+            "Extract 5-10 relevant tags from the following resume. Tags should be skills, job roles, or sectors. "
+            "Return them as a comma-separated list only.\n\n"
+            f"{text}"
+        )
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a resume analysis expert."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        return response['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        print("AI tag generation error:", e)
+        return ""

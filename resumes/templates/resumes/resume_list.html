@@ -10,8 +10,19 @@
 <ul>
   {% for resume in resumes %}
     <li>{{ resume.full_name }} - {{ resume.uploaded_at }}</li>
+
+    {% if resume.tag_list %}
+      <div class="flex flex-wrap gap-2 mt-2">
+        {% for tag in resume.tag_list %}
+          <span class="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+            {{ tag }}
+          </span>
+        {% endfor %}
+      </div>
+    {% endif %}
   {% endfor %}
 </ul>
+
 
 </body>
 </html>

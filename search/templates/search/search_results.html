@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Resume</title>
+</head>
+<body>
+    {% block content %}
+    <div class="max-w-4xl mx-auto p-4">
+    <h2 class="text-xl font-semibold mb-4">Search Resumes by Tags</h2>
+
+    <form method="GET" class="mb-6">
+        <input type="text" name="q" value="{{ query }}" placeholder="e.g., Python, Django, Engineer"
+            class="border px-3 py-2 rounded w-2/3">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Search</button>
+    </form>
+
+    {% if resumes %}
+        <ul class="space-y-4">
+        {% for resume in resumes %}
+            <li class="border p-4 rounded bg-white shadow">
+            <h3 class="font-bold text-lg">{{ resume.full_name }}</h3>
+            <p><strong>Tags:</strong> {{ resume.tags }}</p>
+            <p><strong>Skills:</strong> {{ resume.skills }}</p>
+            <p><strong>Experience:</strong> {{ resume.experience|truncatewords:30 }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No resumes matched your tags.</p>
+    {% endif %}
+    </div>
+    {% endblock %}
+
+</body>
+</html>

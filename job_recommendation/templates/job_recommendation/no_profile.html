@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No_profile</title>
+</head>
+<body>
+    {% block content %}
+        <div class="max-w-xl mx-auto text-center p-10 bg-white rounded shadow mt-8">
+        <h2 class="text-xl font-bold text-red-600 mb-4">Profile Not Found</h2>
+        <p>You must complete your jobseeker profile to get personalized recommendations.</p>
+        <a href="{% url 'jobseekers:profile_builder' %}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">Build Profile</a>
+        </div>
+    {% endblock %}
+</body>
+</html>

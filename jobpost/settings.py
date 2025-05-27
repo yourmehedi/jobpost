@@ -62,7 +62,8 @@ INSTALLED_APPS = [
     'chatbot',
     'core_ui',
     'moderation',
-
+    'search',
+    'job_recommendation',
 ]
 
 SITE_ID = 1

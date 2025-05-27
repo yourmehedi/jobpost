@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Access</title>
+</head>
+<body>
+    {% block content %}
+    <div class="max-w-xl mx-auto p-6 bg-white rounded shadow text-center mt-10">
+    <h2 class="text-xl font-bold mb-4 text-red-600">Access Denied</h2>
+    <p>You don't have permission to use AI resume search. Please upgrade your plan.</p>
+    <a href="{% url 'subscriptions:plan_list' %}" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded">Upgrade Plan</a>
+    </div>
+    {% endblock %}
+</body>
+</html>

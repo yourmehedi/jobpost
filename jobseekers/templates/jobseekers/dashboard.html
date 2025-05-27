@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dashboard</title>
+</head>
+<body>
+{% block content %}
+    <div class="max-w-5xl mx-auto p-6">
+    <h2 class="text-2xl font-bold mb-4">Welcome, {{ jobseeker.full_name }}</h2>
+
+    <div class="mt-6">
+        <h3 class="text-xl font-semibold mb-3 text-blue-700">🔍 Recommended Jobs for You</h3>
+
+        {% if recommended_jobs %}
+        <ul class="space-y-4">
+            {% for job in recommended_jobs %}
+            <li class="bg-white p-4 border rounded shadow">
+                <h4 class="text-lg font-bold">{{ job.title }}</h4>
+                <p><strong>Company:</strong> {{ job.company.name }}</p>
+                <p><strong>Match Score:</strong> {{ job.match_score }}%</p>
+                <p class="text-sm text-gray-700 mt-1">{{ job.description|truncatewords:25 }}</p>
+                <a href="{% url 'jobs:job_detail' job.id %}" class="text-blue-600 mt-2 inline-block">View Details</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-gray-500">No job matches found yet. Try uploading your resume or updating preferences.</p>
+        {% endif %}
+    </div>
+    </div>
+{% endblock %}
+
+</body>
+</html>

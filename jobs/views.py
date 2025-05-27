@@ -75,6 +75,7 @@ def post_job(request):
             return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
         # ✅ Clean/filter text fields
+        # add ai_access
         clean_description = moderate_text(description)
         clean_skills = moderate_text(skills)
         clean_principal = moderate_text(principal)

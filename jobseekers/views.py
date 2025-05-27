@@ -1,10 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import *
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from jobseekers.models import Jobseeker, AdditionalInfo
+from jobs.utils import calculate_match_score
 from datetime import datetime
+from jobs.models import *
+from resumes.models import *
 
 @login_required
 def profile_builder(request):
@@ -60,3 +64,38 @@ def profile_builder(request):
         return redirect('jobseeker:profile_view')
 
     return render(request, 'jobseekers/profile_builder.html', {'jobseeker': jobseeker})
+
+
+@login_required
+def dashboard(request):
+    try:
+        jobseeker = request.user.jobseeker
+    except Jobseeker.DoesNotExist:
+        messages.warning(request, "Please complete your profile first.")
+        return redirect('jobseeker:profile_builder')
+
+    resume = Resume.objects.filter(user=request.user).order_by('-uploaded_at').first()
+    resume_skills = resume.skills if resume else ''
+    resume_exp = resume.experience if resume else ''
+    country = jobseeker.preferred_country or ''
+    city = jobseeker.preferred_city or ''
+
+    jobs = Job.objects.filter(status='active').order_by('-posted_at')
+
+    recommended = []
+    for job in jobs:
+        score = calculate_match_score(job.skills, resume_skills, resume_exp)
+        if country.lower() in (job.country or '').lower():
+            score += 0.1
+        if city.lower() in (job.city or '').lower():
+            score += 0.1
+        if score >= 0.3:
+            job.match_score = round(score * 100)
+            recommended.append(job)
+
+    recommended = sorted(recommended, key=lambda j: j.match_score, reverse=True)
+
+    return render(request, 'jobseekers/dashboard.html', {
+        'jobseeker': jobseeker,
+        'recommended_jobs': recommended[:6]  # Show top 6
+    })

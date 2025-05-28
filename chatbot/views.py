@@ -20,7 +20,7 @@ def chatbot_reply(request):
     if not has_valid_ai_token(request.user):
         return JsonResponse({'error': 'No AI tokens left.'}, status=403)
 
-    user_question = request.POST.get('question', '')
+    user_question = request.POST.get('question', '').strip()
 
     if not user_question:
         return JsonResponse({'error': 'No question received.'}, status=400)
@@ -29,9 +29,16 @@ def chatbot_reply(request):
         openai.api_key = settings.OPENAI_API_KEY
 
         system_prompt = (
-            "You are a helpful assistant for a job platform. "
-            "Guide users on how to use the website: job posting, applying, subscription, profile setup, etc."
+            "You are a friendly and knowledgeable assistant for a job recruitment platform. "
+            "Always try to directly and clearly answer user questions about how to use the site. "
+            "You can help them with job posting, job applications, subscription plans, editing their profile, managing their dashboard, and more. "
+            "Only suggest contacting support if the question is unrelated or there's a technical issue that cannot be resolved by advice. "
+            "Be clear, detailed, and conversational in your replies."
         )
+
+
+        if len(user_question.split()) < 4:
+            user_question += " (If this is unclear, please ask the user to clarify.)"
 
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -42,7 +49,6 @@ def chatbot_reply(request):
         )
 
         answer = response['choices'][0]['message']['content'].strip()
-
         return JsonResponse({'answer': answer})
 
     except Exception as e:

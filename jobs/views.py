@@ -115,10 +115,8 @@ def post_job(request):
 
         return redirect('jobs:job_post_success')
 
-    return render(request, 'jobs/post_job.html', {
-        'companies': companies,
-        'message': message
-    })
+    return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
+
 
 def job_post_success(request):
     return render(request, 'jobs/job_success.html')
@@ -160,7 +158,7 @@ def job_list(request):
     page_number = request.GET.get('page')
     jobs = paginator.get_page(page_number)
 
-    return render(request, 'core_ui/core_ui_base.html', {
+    return render(request, 'jobs/job_list.html', {
         'jobs': jobs,
         'query': query,
         'user_subscription': subscription

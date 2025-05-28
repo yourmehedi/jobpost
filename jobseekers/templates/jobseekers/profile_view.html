@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobseeker Profile</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .profile-container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-header h1 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .profile-detail {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        .profile-detail:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            color: #3498db;
+            font-weight: 600;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+        .navbar-custom {
+            background-color: #3498db;
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: white;
+        }
+        .home-btn {
+            background-color: rgb(67, 44, 44);
+            color: #3498db;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .home-btn:hover {
+            background-color: #485767;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar with Home Button -->
+    <nav class="navbar navbar-expand-lg navbar-custom mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-user-tie me-2"></i>Jobseeker Profile
+            </a>
+            <div class="ms-auto">
+                <a href="/" class="nav-link home-btn">
+                    <i class="fas fa-home me-1"></i> Home Page
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container profile-container">
+        <div class="profile-header">
+            <h1>{{ jobseeker.full_name }}</h1>
+            <p class="text-muted">Professional Profile</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="profile-detail">
+                    <span class="detail-label">Date of Birth:</span> {{ jobseeker.date_of_birth }}
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label">Gender:</span> {{ jobseeker.gender }}
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label">Contact:</span> {{ jobseeker.contact_number }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="profile-detail">
+                    <span class="detail-label">Preferred Country:</span> {{ jobseeker.preferred_country }}
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label">Preferred City:</span> {{ jobseeker.preferred_city }}
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label">Passport Number:</span> {{ jobseeker.passport_number }}
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-detail">
+            <span class="detail-label">Address:</span> {{ jobseeker.address }}
+        </div>
+        <div class="profile-detail">
+            <span class="detail-label">National ID:</span> {{ jobseeker.national_id }}
+        </div>
+
+        {% if additional_info %}
+        <div class="additional-info mt-5">
+            <h3 class="section-title">Additional Information</h3>
+            
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">About Me</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ additional_info.about_me }}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Achievements</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ additional_info.achievements }}</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Hobbies</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ additional_info.hobbies }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

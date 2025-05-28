@@ -65,6 +65,21 @@ def profile_builder(request):
 
     return render(request, 'jobseekers/profile_builder.html', {'jobseeker': jobseeker})
 
+@login_required
+def profile_view(request):
+    try:
+        jobseeker = request.user.jobseeker
+    except:
+        jobseeker = None
+
+    additional_info = None
+    if jobseeker:
+        additional_info = getattr(jobseeker, 'additionalinfo', None)
+
+    return render(request, 'jobseekers/profile_view.html', {
+        'jobseeker': jobseeker,
+        'additional_info': additional_info
+    })
 
 @login_required
 def dashboard(request):

@@ -1,11 +1,14 @@
 # accounts/views.py
 
 from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Employer
 from django.db import transaction
 from jobseekers.models import Jobseeker
+from management.models import Employer
+
 
 User = get_user_model()
 
@@ -55,9 +58,9 @@ def register(request):
             return redirect('accounts:login')
 
     return render(request, 'accounts/register.html')
-
-def login_view(request):  # ✅ NOT `login`
+def login_view(request):
     message = None
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -65,19 +68,29 @@ def login_view(request):  # ✅ NOT `login`
         if username and password:
             user = authenticate(request, username=username, password=password)
             if user:
-                login(request, user)  # ✅ Django's built-in login
-                if user.user_type == 'jobseeker':
-                    return redirect('jobseeker:dashboard')
-                elif user.user_type == 'employer':
+                login(request, user)
+
+                # ✅ Superuser check
+                if user.is_superuser or user.user_type == 'superadmin':
+                    return redirect('management:dashboard')
+
+                # ✅ Employer check
+                elif user.user_type == 'employer':  # ✅ fixed
                     return redirect('employer:dashboard')
+
+                # ✅ Jobseeker check
+                elif user.user_type == 'jobseeker':  # ✅ fixed
+                    return redirect('jobseeker:dashboard')
+
                 else:
-                    return redirect('management:home')
+                    message = 'Unknown user type.'
             else:
                 message = 'Invalid username or password'
         else:
             message = 'Username and password are required'
 
     return render(request, 'accounts/login.html', {'message': message})
+
 
 def user_profile(request):
     return render(request, 'accounts/profile.html')

@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model, authenticate, login
 from employers.models import EmployerProfile
+from management.models import Employer
 from jobs.models import Job
 from .models import *
 from django.contrib import messages
@@ -13,11 +14,10 @@ from django.contrib.auth.decorators import user_passes_test
 User = get_user_model()
 
 
-
+@login_required
 def home(request):
     return render(request, 'management/home.html')
 
-from management.models import Employer
 def employer_register(request):
     if request.method == 'POST':
         form = EmployerRegistrationForm(request.POST, request.FILES)

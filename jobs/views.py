@@ -16,6 +16,8 @@ from resumes.models import Resume
 from moderation.utils import moderate_text
 from jobs.utils import calculate_match_score
 from subscriptions.models import Subscription
+from django.template.loader import render_to_string
+from django.http import HttpResponse
 
 def has_valid_ai_token(user):
     sub = Subscription.objects.filter(employer=user, active=True).first()
@@ -121,13 +123,7 @@ def post_job(request):
 def job_post_success(request):
     return render(request, 'jobs/job_success.html')
 
-@login_required(login_url='accounts:login') 
 def job_list(request):
-
-    # if not has_valid_ai_token(request.user):
-    #     messages.error(request, "You have no AI tokens left. Please upgrade your plan to continue using AI-based matching.")
-    #     return redirect('employers:dashboard')
-    
     query = request.GET.get('q', '')
     job_queryset = Job.objects.select_related('company').order_by('-posted_at')
     subscription = Subscription.objects.filter(employer=request.user, active=True).first()
@@ -138,12 +134,10 @@ def job_list(request):
             Q(company__name__icontains=query)
         )
 
-    # ✅ ইউজারের সর্বশেষ রিজিউম ডেটা আনো
     user_resume = Resume.objects.filter(user=request.user).order_by('-uploaded_at').first()
     resume_skills = user_resume.skills if user_resume else ''
     resume_experience = user_resume.experience if user_resume else ''
 
-    # ✅ প্রতিটি জব এর সাথে Matching স্কোর যুক্ত করো
     for job in job_queryset:
         job.skill_list = job.skills.split(",") if job.skills else []
         job.perk_list = job.perks.split(",") if job.perks else []
@@ -153,7 +147,6 @@ def job_list(request):
         else:
             job.match_score = None
 
-    # Pagination: 8 jobs per page
     paginator = Paginator(job_queryset, 8)
     page_number = request.GET.get('page')
     jobs = paginator.get_page(page_number)
@@ -166,7 +159,23 @@ def job_list(request):
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)
+    job.skill_list = job.skills.split(",") if job.skills else []
+    job.perk_list = job.perks.split(",") if job.perks else []
     return render(request, 'jobs/job_detail.html', {'job': job})
+
+def job_detail_modal(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    job.skill_list = job.skills.split(",") if job.skills else []
+    job.perk_list = job.perks.split(",") if job.perks else []
+    return render(request, 'jobs/job_detail_modal.html', {'job': job})
+
+def ajax_job_detail(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    job.skill_list = job.skills.split(",") if job.skills else []
+    job.perk_list = job.perks.split(",") if job.perks else []
+
+    html = render_to_string('jobs/job_detail_modal.html', {'job': job}, request=request)
+    return HttpResponse(html)
 
 def apply(request, job_id):
     job = get_object_or_404(Job, id=job_id)

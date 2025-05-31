@@ -1,209 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobPortal - Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root {
-      --primary-color: #007BFF;
-      --primary-hover: #0056b3;
-      --gradient-start: #74ebd5;
-      --gradient-end: #ACB6E5;
-    }
-    
     body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f8f9fa;
       margin: 0;
       padding: 0;
-      background: linear-gradient(120deg, var(--gradient-start), var(--gradient-end));
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
     }
-
-    .login-container {
-      background-color: #fff;
-      padding: 2.5rem;
-      border-radius: 16px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-      width: 100%;
-      max-width: 420px;
-      transition: transform 0.3s ease;
-    }
-
-    .login-container:hover {
-      transform: translateY(-5px);
-    }
-
-    .login-title {
-      text-align: center;
-      font-size: 2rem;
-      color: #333;
-      margin-bottom: 1.8rem;
-      font-weight: 600;
-    }
-
-    .form-control {
-      padding: 0.875rem 1rem;
-      margin-bottom: 1.4rem;
-      border-radius: 10px;
-      background-color: #f9f9f9;
-      transition: all 0.3s;
-    }
-
-    .form-control:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.15);
-      background-color: #fff;
-    }
-
-    .btn-primary {
-      background-color: var(--primary-color);
-      border: none;
-      border-radius: 10px;
-      padding: 0.875rem;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-      transform: scale(1.02);
-    }
-
-    .divider {
+    
+    .main-container {
       display: flex;
-      align-items: center;
-      margin: 1.5rem 0;
-      color: #666;
+      min-height: 100vh;
     }
-
-    .divider::before,
-    .divider::after {
-      content: "";
+    
+    .content-section {
       flex: 1;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .divider::before {
-      margin-right: 1rem;
-    }
-
-    .divider::after {
-      margin-left: 1rem;
-    }
-
-    .social-login {
+      padding: 60px;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .btn-social {
-      display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 0.75rem;
-      border-radius: 10px;
+      background-color: #ffffff;
+    }
+    
+    .login-section {
+      width: 400px;
+      background-color: #ffffff;
+      padding: 40px;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .logo {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    
+    .logo img {
+      height: 50px;
+    }
+    
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #222;
+    }
+    
+    .welcome-text {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
       font-weight: 500;
-      transition: all 0.3s;
+      color: #444;
     }
-
-    .btn-social i {
-      margin-right: 0.75rem;
-      font-size: 1.1rem;
-    }
-
-    .btn-google {
-      background-color: #fff;
-      color: #757575;
+    
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
       border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
     }
-
-    .btn-google:hover {
-      background-color: #f8f9fa;
-      color: #757575;
-      border-color: #ddd;
-    }
-
-    .btn-facebook {
-      background-color: #3b5998;
+    
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #2563eb;
       color: white;
       border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s;
     }
-
-    .btn-facebook:hover {
-      background-color: #344e86;
-      color: white;
+    
+    .login-btn:hover {
+      background-color: #1d4ed8;
     }
-
-    .signup-link {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.9375rem;
+    
+    .forgot-password {
+      text-align: right;
+      margin-top: 5px;
     }
-
-    .signup-link a {
-      color: var(--primary-color);
+    
+    .forgot-password a {
+      color: #666;
       text-decoration: none;
-      font-weight: 500;
+      font-size: 14px;
     }
-
-    .signup-link a:hover {
+    
+    .forgot-password a:hover {
       text-decoration: underline;
     }
-
-    .error-message {
-      color: #dc3545;
+    
+    .social-login {
+      margin-top: 25px;
+    }
+    
+    .social-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
       text-align: center;
-      margin-top: 1rem;
-      font-size: 0.875rem;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .google-btn {
+      background-color: #ffffff;
+      color: #444;
+      border: 1px solid #ddd;
+    }
+    
+    .google-btn:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .facebook-btn {
+      background-color: #3b5998;
+      color: white;
+      border: 1px solid #3b5998;
+    }
+    
+    .facebook-btn:hover {
+      background-color: #344e86;
+    }
+    
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+    }
+    
+    @media (max-width: 992px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .content-section {
+        padding: 40px 20px;
+      }
+      
+      .login-section {
+        width: 100%;
+        padding: 30px 20px;
+      }
+      
+      .logo {
+        margin-bottom: 30px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2 class="login-title">Login</h2>
-
-    <form method="POST" action="{% url 'accounts:login' %}">
-      {% csrf_token %}
-      <div class="mb-3">
-        <input type="text" class="form-control" name="username" placeholder="Username" required>
+  <div class="main-container">
+    <!-- Left Content Section -->
+    <div class="content-section">
+      <div class="logo">
+        <img src="https://via.placeholder.com/200x50?text=JobPortal+Logo" alt="JobPortal Logo">
       </div>
-      <div class="mb-3">
-        <input type="password" class="form-control" name="password" placeholder="Password" required>
+      
+      <h1>Welcome to JobPortal</h1>
+      <p class="welcome-text">
+        Find your dream job or the perfect candidate. Join thousands of professionals 
+        and companies who are already benefiting from our platform. Our advanced matching 
+        algorithm connects the right talent with the right opportunities.
+      </p>
+      
+      <div class="features">
+        <p><i class="fas fa-check-circle" style="color: #2563eb;"></i> Access to thousands of job listings</p>
+        <p><i class="fas fa-check-circle" style="color: #2563eb;"></i> Personalized job recommendations</p>
+        <p><i class="fas fa-check-circle" style="color: #2563eb;"></i> Company reviews and ratings</p>
       </div>
-      <button type="submit" class="btn btn-primary w-100">Login</button>
-    </form>
-    
-    <div class="divider">OR</div>
-    
-    <div class="social-login">
-      <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}" class="btn btn-social btn-google">
-        <i class="fab fa-google"></i> Login with Google
-      </a>
-      <a href="#" class="btn btn-social btn-facebook">
-        <i class="fab fa-facebook-f"></i> Login with Facebook
-      </a>
     </div>
     
-    <div class="signup-link">
-      Don't have an account? <a href="#">Sign up</a>
-    </div>
-    
-    <!-- Error message placeholder -->
-    <div class="error-message">
-      <!-- Error messages will appear here -->
+    <!-- Right Login Section -->
+    <div class="login-section">
+      <form>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter Your Email">
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Enter Your Password">
+          <div class="forgot-password">
+            <a href="#">Forget Password? Reset Password</a>
+          </div>
+        </div>
+        
+        <button type="submit" class="login-btn">Sign in to JobPortal</button>
+        
+        <div class="social-login">
+          <p style="text-align: center; margin-bottom: 15px; color: #666;">Or sign in with</p>
+          <a href="#" class="social-btn google-btn">
+            <i class="fab fa-google"></i> Sign in with Google
+          </a>
+          <a href="#" class="social-btn facebook-btn">
+            <i class="fab fa-facebook-f"></i> Sign in with Facebook
+          </a>
+        </div>
+      </form>
+      
+      <div class="footer">
+        <p><strong>JobPortal</strong> | support</p>
+        <p>You are interacting with JobPortal system. © 2024, All Rights Reserved</p>
+      </div>
     </div>
   </div>
 
-  <!-- Bootstrap 5 JS Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

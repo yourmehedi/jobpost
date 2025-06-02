@@ -18,6 +18,19 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'
 
+    @property
+    def is_employer(self):
+        return self.user_type == 'employer'
+
+    @property
+    def is_jobseeker(self):
+        return self.user_type == 'jobseeker'
+
+    @property
+    def is_superadmin(self):
+        return self.user_type == 'superadmin'
+
+
     def __str__(self):
         return f"{self.username} ({self.user_type})"
 

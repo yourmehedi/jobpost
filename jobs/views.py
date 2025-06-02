@@ -125,7 +125,8 @@ def job_post_success(request):
 
 def job_list(request):
     query = request.GET.get('q', '')
-    job_queryset = Job.objects.select_related('company').order_by('-posted_at')
+    job_queryset = Job.objects.select_related('company').filter(status='active').order_by('-posted_at')  # ✅ এখানে ফিল্টার করো
+
     subscription = Subscription.objects.filter(employer=request.user, active=True).first()
 
     if query:
@@ -156,6 +157,7 @@ def job_list(request):
         'query': query,
         'user_subscription': subscription
     })
+
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)

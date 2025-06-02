@@ -12,10 +12,11 @@ from .models import *
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 User = get_user_model()
-
+  
 
 @login_required
 def home(request):
+    print(request.user)
     return render(request, 'management/home.html')
 
 def employer_register(request):
@@ -94,8 +95,10 @@ def verify_employer(request, id):
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def job_monitoring(request):
     jobs = Job.objects.all()
-
+    # সব job দেখাবে, employer থাক বা না থাক
     return render(request, 'management/job_monitoring.html', {'jobs': jobs})
+
+
 
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def approve_user(request, user_id):
@@ -103,4 +106,24 @@ def approve_user(request, user_id):
     user.is_active = True
     user.save()
     return redirect('management:user_approval')
+
+def review_user_jobs(request, employer_id):
+    employer = get_object_or_404(Employer, id=employer_id)
+    jobs = Job.objects.filter(employer=employer)
+    return render(request, 'management/review_user_jobs.html', {'employer': employer, 'jobs': jobs})
+
+def toggle_job_status(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    
+    if job.status == 'active':
+        job.status = 'closed'
+    else:
+        job.status = 'active'
+    job.save()
+    return redirect('management:job_monitoring')
+
+def delete_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    job.delete()
+    return redirect('management:job_monitoring')
 

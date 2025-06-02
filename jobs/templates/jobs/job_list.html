@@ -272,20 +272,24 @@
         {% if jobs.has_previous %}
           <li class="page-item">
             <a class="page-link" href="?page=1&{{ query_string }}" aria-label="First">
-              <span aria-hidden="true">&laquo;&laquo;</span>
+              <i class="bi bi-chevron-double-left"></i>
             </a>
           </li>
           <li class="page-item">
             <a class="page-link" href="?page={{ jobs.previous_page_number }}&{{ query_string }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
+              <i class="bi bi-chevron-left"></i>
             </a>
           </li>
         {% else %}
           <li class="page-item disabled">
-            <span class="page-link">&laquo;&laquo;</span>
+            <span class="page-link">
+              <i class="bi bi-chevron-double-left"></i>
+            </span>
           </li>
           <li class="page-item disabled">
-            <span class="page-link">&laquo;</span>
+            <span class="page-link">
+              <i class="bi bi-chevron-left"></i>
+            </span>
           </li>
         {% endif %}
 
@@ -304,20 +308,24 @@
         {% if jobs.has_next %}
           <li class="page-item">
             <a class="page-link" href="?page={{ jobs.next_page_number }}&{{ query_string }}" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
+              <i class="bi bi-chevron-right"></i>
             </a>
           </li>
           <li class="page-item">
             <a class="page-link" href="?page={{ jobs.paginator.num_pages }}&{{ query_string }}" aria-label="Last">
-              <span aria-hidden="true">&raquo;&raquo;</span>
+              <i class="bi bi-chevron-double-right"></i>
             </a>
           </li>
         {% else %}
           <li class="page-item disabled">
-            <span class="page-link">&raquo;</span>
+            <span class="page-link">
+              <i class="bi bi-chevron-right"></i>
+            </span>
           </li>
           <li class="page-item disabled">
-            <span class="page-link">&raquo;&raquo;</span>
+            <span class="page-link">
+              <i class="bi bi-chevron-double-right"></i>
+            </span>
           </li>
         {% endif %}
       </ul>

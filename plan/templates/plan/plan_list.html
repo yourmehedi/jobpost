@@ -146,7 +146,7 @@
               Current Plan
             </button>
           {% else %}
-            <a href="{% url 'purchase_plan' plan.id %}" class="mt-auto w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-600 transition duration-200 text-center">
+            <a href="{% url 'subscriptions:purchase_plan' plan.id %}" class="mt-auto w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-600 transition duration-200 text-center">
               {% if user_subscription %}Switch Plan{% else %}Get Started{% endif %}
             </a>
           {% endif %}
@@ -182,7 +182,7 @@
               Current Plan
             </button>
           {% else %}
-            <a href="{% url 'purchase_plan' plan.id %}" class="mt-auto w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-600 transition duration-200 text-center">
+            <a href="{% url 'subscriptions:purchase_plan' plan.id %}" class="mt-auto w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-600 transition duration-200 text-center">
               {% if user_subscription %}Switch Plan{% else %}Get Started{% endif %}
             </a>
           {% endif %}
@@ -231,7 +231,7 @@
               Current Plan
             </button>
           {% else %}
-            <a href="{% url 'purchase_plan' plan.id %}" class="mt-auto w-full py-3 px-6 bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-600 transition duration-200 text-center">
+            <a href="{% url 'subscriptions:purchase_plan' plan.id %}" class="mt-auto w-full py-3 px-6 bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-600 transition duration-200 text-center">
               {% if user_subscription %}Switch Plan{% else %}Get Started{% endif %}
             </a>
           {% endif %}

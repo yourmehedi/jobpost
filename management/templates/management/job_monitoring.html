@@ -23,7 +23,6 @@
                 {% else %}
                     <i class="text-muted">No employer</i>
                 {% endif %}
-
             </td>
             <td>
                 {% if job.status == 'active' %}
@@ -37,22 +36,25 @@
                 {% endif %}
             </td>
             <td>
-                <!-- Review button -->
-                <td>
+                <div class="d-flex flex-wrap gap-2">
+                    <!-- Review button -->
                     {% if job.employer %}
-                        <a href="{% url 'management:review_user_jobs' job.employer.id %}" class="btn btn-sm btn-info mb-1">Review</a>
+                        <a href="{% url 'management:review_user_jobs' job.employer.id %}" class="btn btn-sm btn-info">Review</a>
                     {% else %}
                         <span class="text-muted">No employer</span>
                     {% endif %}
-                </td>
 
-                <!-- Toggle Status -->
-               <a href="{% url 'management:toggle_job_status' job.id %}" class="btn btn-sm btn-warning mb-1">
-                    {% if job.status == 'active' %}Deactivate{% else %}Activate{% endif %}
-                </a>
+                    <!-- Toggle Status -->
+                    <a href="{% url 'management:toggle_job_status' job.id %}" class="btn btn-sm btn-warning">
+                        {% if job.status == 'active' %}Deactivate{% else %}Activate{% endif %}
+                    </a>
 
-                <a href="{% url 'management:delete_job' job.id %}" class="btn btn-sm btn-danger"
-                onclick="return confirm('Are you sure you want to delete this job?');">Delete</a>
+                    <!-- Delete button -->
+                    <a href="{% url 'management:delete_job' job.id %}" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this job?');">
+                        Delete
+                    </a>
+                </div>
             </td>
         </tr>
         {% endfor %}

@@ -119,13 +119,12 @@ def post_job(request):
 
     return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
-
 def job_post_success(request):
     return render(request, 'jobs/job_success.html')
 
 def job_list(request):
     query = request.GET.get('q', '')
-    job_queryset = Job.objects.select_related('company').filter(status='active').order_by('-posted_at')  # ✅ এখানে ফিল্টার করো
+    job_queryset = Job.objects.select_related('company').filter(status='active').order_by('-posted_at')
 
     subscription = Subscription.objects.filter(employer=request.user, active=True).first()
 
@@ -139,6 +138,9 @@ def job_list(request):
     resume_skills = user_resume.skills if user_resume else ''
     resume_experience = user_resume.experience if user_resume else ''
 
+    # Get all job IDs saved by current user
+    # saved_jobs_ids = set(SavedJob.objects.filter(user=request.user).values_list('job_id', flat=True))
+
     for job in job_queryset:
         job.skill_list = job.skills.split(",") if job.skills else []
         job.perk_list = job.perks.split(",") if job.perks else []
@@ -147,6 +149,9 @@ def job_list(request):
             job.match_score = calculate_match_score(job.skills, resume_skills, resume_experience)
         else:
             job.match_score = None
+
+        # Mark if this job is saved by the current user
+        # job.is_saved = job.id in saved_jobs_ids
 
     paginator = Paginator(job_queryset, 8)
     page_number = request.GET.get('page')
@@ -157,7 +162,6 @@ def job_list(request):
         'query': query,
         'user_subscription': subscription
     })
-
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)
@@ -239,7 +243,6 @@ def consume_user_token(user):
     if subscription and subscription.consume_token():
         return True
     return False
-
 
 @login_required
 def generate_job_description(request):

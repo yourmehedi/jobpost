@@ -6,9 +6,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from jobseekers.models import Jobseeker, AdditionalInfo
 from jobs.utils import calculate_match_score
+from .forms import JobseekerSettingsForm, PasswordChangeForm, DocumentUploadForm
+from django.contrib.auth import update_session_auth_hash
 from datetime import datetime
 from jobs.models import *
 from resumes.models import *
+from .forms import *
 
 @login_required
 def profile_builder(request):
@@ -68,10 +71,10 @@ def profile_builder(request):
 @login_required
 def profile_view(request):
     try:
-        jobseeker = request.user.jobseeker
+        jobseeker = request.user.jobseeker_profile
     except:
         jobseeker = None
-
+    
     additional_info = None
     if jobseeker:
         additional_info = getattr(jobseeker, 'additionalinfo', None)
@@ -81,10 +84,67 @@ def profile_view(request):
         'additional_info': additional_info
     })
 
+
+@login_required
+def edit_profile(request):
+    jobseeker = request.user.jobseeker_profile  # Ensure related_name is used
+    if request.method == 'POST':
+        form = JobseekerForm(request.POST, instance=jobseeker)
+        if form.is_valid():
+            form.save()
+            return redirect('jobseeker:profile_view')  # Replace with your profile view URL name
+    else:
+        form = JobseekerForm(instance=jobseeker)
+    return render(request, 'jobseekers/edit_profile.html', {'form': form})
+
+@login_required
+def account_settings(request):
+    jobseeker = request.user.jobseeker_profile
+
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            settings_form = JobseekerSettingsForm(request.POST, request.FILES, instance=jobseeker)
+            if settings_form.is_valid():
+                settings_form.save()
+                messages.success(request, 'Profile updated successfully!')
+            else:
+                messages.error(request, 'Please correct the errors in your profile form.')
+
+        elif 'change_password' in request.POST:
+            password_form = PasswordChangeForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Password changed successfully!')
+            else:
+                messages.error(request, 'Please correct the errors in your password form.')
+
+        elif 'upload_document' in request.POST:
+            document_form = DocumentUploadForm(request.POST, request.FILES, instance=jobseeker)
+            if document_form.is_valid():
+                document_form.save()
+                messages.success(request, 'Document updated!')
+            else:
+                messages.error(request, 'Please correct the errors in your document upload form.')
+
+        return redirect('jobseeker:account_settings')
+
+    else:
+        settings_form = JobseekerSettingsForm(instance=jobseeker)
+        password_form = PasswordChangeForm(user=request.user)
+        document_form = DocumentUploadForm(instance=jobseeker)
+
+    context = {
+        'settings_form': settings_form,
+        'password_form': password_form,
+        'document_form': document_form,
+    }
+    return render(request, 'jobseekers/settings.html', context)
+
 @login_required
 def dashboard(request):
     try:
-        jobseeker = request.user.jobseeker
+        jobseeker = request.user.jobseeker_profile
     except Jobseeker.DoesNotExist:
         messages.warning(request, "Please complete your profile first.")
         return redirect('jobseeker:profile_builder')

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Seeker Register</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
+    }
+
+    .register-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .register-container h2 {
+      text-align: center;
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #74ebd5;
+    }
+
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+    }
+
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #0069d9;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+        align-items: flex-start;
+      }
+
+      .register-container {
+        padding: 20px;
+      }
+
+      .form-control {
+        padding: 10px 12px;
+        font-size: 15px;
+      }
+
+      .btn {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>Create Job Seeker Account</h2>
+    <form method="POST" enctype="multipart/form-data">
+      <!-- User Info -->
+       {% csrf_token %}
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password2">Confirm Password</label>
+        <input type="password" id="password2" name="password2" class="form-control" placeholder="Confirm password" required>
+      </div>
+
+      <!-- Jobseeker Info -->
+      <div class="form-group">
+        <label for="full_name">Full Name</label>
+        <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Enter full name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="date_of_birth">Date of Birth</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" class="form-control" required>
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="contact_number">Contact Number</label>
+        <input type="tel" id="contact_number" name="contact_number" class="form-control" placeholder="Enter contact number" required>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address</label>
+        <textarea id="address" name="address" class="form-control" placeholder="Enter your address" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="job_type_preference">Job Type Preference</label>
+        <select id="job_type_preference" name="job_type_preference" class="form-control" required>
+          <option value="">Select Job Type</option>
+          <option value="local">Local</option>
+          <option value="abroad">Abroad</option>
+          <option value="remote">Remote</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="preferred_country">Preferred Country (Optional)</label>
+        <input type="text" id="preferred_country" name="preferred_country" class="form-control" placeholder="Enter preferred country">
+      </div>
+
+      <div class="form-group">
+        <label for="preferred_city">Preferred City (Optional)</label>
+        <input type="text" id="preferred_city" name="preferred_city" class="form-control" placeholder="Enter preferred city">
+      </div>
+
+      <div class="form-group">
+        <label for="passport_number">Passport Number (Optional)</label>
+        <input type="text" id="passport_number" name="passport_number" class="form-control" placeholder="Enter passport number">
+      </div>
+
+      <div class="form-group">
+        <label for="national_id">National ID (Optional)</label>
+        <input type="text" id="national_id" name="national_id" class="form-control" placeholder="Enter national ID">
+      </div>
+
+      <div class="form-group">
+        <label for="document_upload">Upload Documents (Optional)</label>
+        <input type="file" id="document_upload" name="document_upload" class="form-control" accept=".pdf,.doc,.docx,.jpg,.png">
+      </div>
+
+      <button type="submit" class="btn">Register</button>
+    </form>
+  </div>
+</body>
+</html>

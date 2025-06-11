@@ -11,7 +11,9 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
     path('profile/', views.user_profile, name='profile'),
-    path('register/', views.register, name='register'),
+    path('jobseekres-registretion-form/', views.jobseeker_register, name='jobseeker_register'),
+    path('employer-registretion-form/', views.employer_register, name='employer_register'),
+    path('google-login/', views.google_login, name='google_login'),
+    path('logout/', views.logout_view, name='logout'),
     path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),   
 ]

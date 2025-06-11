@@ -1,50 +1,131 @@
-{% extends 'management/base_admin.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-{% block content %}
-<h2>Employer Registration</h2>
+        form {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+        }
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            
+            
+        }
 
-    <div class="mb-3">
-        {{ form.company_name.label_tag }}
-        {{ form.company_name }}
-    </div>
+        form p {
+            margin-bottom: 20px;
+        }
 
-    <div class="mb-3">
-        {{ form.employer_type.label_tag }}
-        {{ form.employer_type }}
-    </div>
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #444;
+        }
 
-    <div id="license_fields" style="display: none;">
-        <div class="mb-3">
-            {{ form.license_number.label_tag }}
-            {{ form.license_number }}
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #74ebd5;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    
+    <form method="post" enctype="multipart/form-data">
+        <h2>Employer Registration</h2>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <div>
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
         </div>
-        <div class="mb-3">
+    
+        <div>
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+    
+        <div>
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+
+        <div>
             {{ form.license_file.label_tag }}
             {{ form.license_file }}
+            {{ form.license_file.errors }}
         </div>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
-
-<script>
-    function toggleLicenseFields() {
-        const type = document.getElementById('id_employer_type').value;
-        const licenseSection = document.getElementById('license_fields');
-        if (type === 'local_agency' || type === 'overseas_agency') {
-            licenseSection.style.display = 'block';
-        } else {
-            licenseSection.style.display = 'none';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        toggleLicenseFields();
-        document.getElementById('id_employer_type').addEventListener('change', toggleLicenseFields);
-    });
-</script>
-{% endblock %}
+        
+        <div>
+            {{ form.company_name.label_tag }}
+            {{ form.company_name }}
+            {{ form.company_name.errors }}
+        </div>
+    
+        <div>
+            {{ form.employer_type.label_tag }}
+            {{ form.employer_type }}
+            {{ form.employer_type.errors }}
+        </div>
+    
+        <div>
+            {{ form.company_website.label_tag }}
+            {{ form.company_website }}
+            {{ form.company_website.errors }}
+        </div>
+    
+        <button type="submit">Register</button>
+    </form>
+    
+</body>
+</html>

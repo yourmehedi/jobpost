@@ -5,7 +5,7 @@ import random
 from .models import *
 from django.contrib import messages
 from .utils import get_employer_limits
-from accounts.models import Employer
+from accounts.models import *
 from datetime import datetime
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import JobApplication
@@ -13,6 +13,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from resumes.models import Resume  
+from employers.models import EmployerProfile
 from moderation.utils import moderate_text
 from jobs.utils import calculate_match_score
 from subscriptions.models import Subscription
@@ -30,8 +31,8 @@ def post_job(request):
 
     if request.method == 'POST':
         try:
-            employer = request.user.management_employer
-        except AttributeError:
+            employer = request.user.employer_profile
+        except EmployerProfile.DoesNotExist:
             message = "You must have an employer account to post a job."
             return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
@@ -124,7 +125,7 @@ def job_post_success(request):
 
 def job_list(request):
     query = request.GET.get('q', '')
-    job_queryset = Job.objects.select_related('company').filter(status='active').order_by('-posted_at')
+    job_queryset = Job.objects.select_related('company').filter(status='active').order_by('-posted_at')  # ✅ এখানে ফিল্টার করো
 
     subscription = Subscription.objects.filter(employer=request.user, active=True).first()
 
@@ -138,30 +139,34 @@ def job_list(request):
     resume_skills = user_resume.skills if user_resume else ''
     resume_experience = user_resume.experience if user_resume else ''
 
-    # Get all job IDs saved by current user
-    # saved_jobs_ids = set(SavedJob.objects.filter(user=request.user).values_list('job_id', flat=True))
+    # for job in job_queryset:
+    #     job.skill_list = job.skills.split(",") if job.skills else []
+    #     job.perk_list = job.perks.split(",") if job.perks else []
 
-    for job in job_queryset:
+    #     if resume_skills:
+    #         job.match_score = calculate_match_score(job.skills, resume_skills, resume_experience)
+    #     else:
+    #         job.match_score = None
+
+    paginator = Paginator(job_queryset, 8)
+    page_number = request.GET.get('page')
+    jobs = paginator.get_page(page_number)
+
+    for job in jobs:  # Only calculate for current page
         job.skill_list = job.skills.split(",") if job.skills else []
         job.perk_list = job.perks.split(",") if job.perks else []
-
         if resume_skills:
             job.match_score = calculate_match_score(job.skills, resume_skills, resume_experience)
         else:
             job.match_score = None
 
-        # Mark if this job is saved by the current user
-        # job.is_saved = job.id in saved_jobs_ids
-
-    paginator = Paginator(job_queryset, 8)
-    page_number = request.GET.get('page')
-    jobs = paginator.get_page(page_number)
 
     return render(request, 'jobs/job_list.html', {
         'jobs': jobs,
         'query': query,
         'user_subscription': subscription
     })
+
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)

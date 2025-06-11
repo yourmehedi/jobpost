@@ -5,12 +5,13 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Jobseeker(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='jobseeker_profile')
     full_name = models.CharField(max_length=150)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=20, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
     contact_number = models.CharField(max_length=20)
     address = models.TextField()
+    email = models.EmailField()
     job_type_preference = models.CharField(
         max_length=50,
         choices=[('local', 'Local'), ('abroad', 'Abroad'), ('remote', 'Remote')],

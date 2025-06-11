@@ -4,6 +4,7 @@ User = get_user_model()
 from accounts.models import CustomUser
 from management.models import Employer
 from django.utils import timezone
+from employers.models import EmployerProfile
 
 class Company(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -30,7 +31,7 @@ class Job(models.Model):
 
 
 
-    employer = models.ForeignKey(Employer, on_delete=models.CASCADE, null=True, blank=True)
+    employer = models.ForeignKey('employers.EmployerProfile', on_delete=models.CASCADE, null=True, blank=True)
     skills = models.CharField(max_length=255, blank=True)
     perks = models.CharField(max_length=255, blank=True)
     tech_stack = models.CharField(max_length=255, blank=True)
@@ -60,7 +61,7 @@ class Job(models.Model):
 
 
 class JobPost(models.Model):
-    employer = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    employer = models.ForeignKey('employers.EmployerProfile', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
     location = models.CharField(max_length=255, default='default_location')
@@ -77,3 +78,12 @@ class JobApplication(models.Model):
 
     def __str__(self):
         return f"{self.name} applied for {self.job.title}"
+    
+
+@property
+def skill_list(self):
+    return self.skills.split(',') if self.skills else []
+
+@property
+def perk_list(self):
+    return self.perks.split(',') if self.perks else []

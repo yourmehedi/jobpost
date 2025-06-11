@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Employer
+from .models import *
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -23,7 +23,7 @@ class CustomUserAdmin(UserAdmin):
     )
     ordering = ('email',)
 
-@admin.register(Employer)
+
 class EmployerAdmin(admin.ModelAdmin):
     list_display = ('user', 'company_name', 'employer_type', 'tin', 'is_approved')
     list_filter = ('employer_type', 'is_approved')

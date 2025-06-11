@@ -1,22 +1,33 @@
 from django import forms
-from .models import EmployerProfile
 from django.contrib.auth import get_user_model
+from .models import EmployerProfile
+from django.core.exceptions import ValidationError
 
-User = get_user_model()  
+User = get_user_model()
 
 class EmployerRegistrationForm(forms.ModelForm):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    email = forms.EmailField()
+
     class Meta:
         model = EmployerProfile
-        fields = ['company_name', 'employer_type', 'license_number', 'license_file']
+        fields = ['company_name', 'employer_type', 'company_website', 'license_file']
 
-    def clean(self):
-        cleaned_data = super().clean()
-        employer_type = cleaned_data.get('employer_type')
-        license_file = cleaned_data.get('license_file')
-        license_number = cleaned_data.get('license_number')
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("This username is already taken.")
+        return username
 
-        if employer_type in ['local_agency', 'overseas_agency']:
-            if not license_file:
-                self.add_error('license_file', 'License file is required for selected employer type.')
-            if not license_number:
-                self.add_error('license_number', 'License number is required for selected employer type.')
+    def save(self, commit=True):
+        user = User.objects.create_user(
+            username=self.cleaned_data['username'],
+            password=self.cleaned_data['password'],
+            email=self.cleaned_data['email']
+        )
+        employer = super().save(commit=False)
+        employer.user = user
+        if commit:
+            employer.save()
+        return employer

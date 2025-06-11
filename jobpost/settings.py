@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path 
+from django.core.files.base import ContentFile
+from decouple import config
+
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET')
+GOOGLE_REDIRECT_URI = config('GOOGLE_REDIRECT_URI')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +27,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-t)(8q$nx-efu$y!z0rofgz+k+o_beoq8&zc+o*m%l-!!^&t2iy'
+SECRET_KEY = config("SECRET_KEY")
 
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -49,6 +55,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
 
+    'crispy_forms',
+    'crispy_bootstrap5',
+
 
     'accounts',
     'management',
@@ -66,6 +75,9 @@ INSTALLED_APPS = [
     'job_recommendation',
 ]
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = (
@@ -74,8 +86,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '351767731770-ctuh90cr8qmktfcl21na0g274pc91pmo.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
@@ -186,7 +198,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+MEDIA_URL = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

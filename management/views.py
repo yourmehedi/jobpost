@@ -13,7 +13,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 User = get_user_model()
   
-
 @login_required
 def home(request):
     print(request.user)
@@ -69,7 +68,7 @@ def superuser_login_view(request):
                 login(request, user)
                 return redirect('management:dashboard')  
             else:
-                messages.error(request, 'you are nou superuser!')
+                messages.error(request, 'you are not superuser!')
         else:
             messages.error(request, 'Username and password wrong!')
 

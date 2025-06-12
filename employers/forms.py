@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from .models import EmployerProfile
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import PasswordChangeForm
 
 User = get_user_model()
 
@@ -31,3 +32,36 @@ class EmployerRegistrationForm(forms.ModelForm):
         if commit:
             employer.save()
         return employer
+    
+
+class EmployerProfileForm(forms.ModelForm):
+    class Meta:
+        model = EmployerProfile
+        fields = [
+            'company_name',
+            'employer_type',
+            'company_website',
+            'license_number',
+            'license_file',
+            'official_address',
+            'contact_number',
+            'tin',
+        ]
+
+class EmployerProfileForm(forms.ModelForm):
+    class Meta:
+        model = EmployerProfile
+        fields = [
+            'company_name',
+            'employer_type',
+            'company_website',
+            'license_number',
+            'official_address',
+            'contact_number',
+            'tin',
+        ]
+
+class EmployerDocumentForm(forms.ModelForm):
+    class Meta:
+        model = EmployerProfile
+        fields = ['license_file']

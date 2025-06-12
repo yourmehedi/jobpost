@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Employer Account Settings</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-bottom: 60px; /* Add space for mobile */
+        }
+        
+        .settings-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+            height: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        h2, h4 {
+            color: #2c3e50;
+        }
+        
+        h2 i, h4 i {
+            margin-right: 10px;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .alert {
+            border-radius: 8px;
+        }
+        
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 15px;
+            }
+            
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            .row {
+                margin-left: -10px;
+                margin-right: -10px;
+            }
+            
+            .col-md-6 {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+            }
+            
+            /* Make form inputs more mobile friendly */
+            .form-control, .form-select {
+                font-size: 16px;
+                padding: 12px 15px;
+            }
+            
+            /* Crispy forms adjustments */
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+        }
+        
+        /* Crispy forms mobile adjustments */
+        @media (max-width: 576px) {
+            .form-label {
+                font-size: 15px;
+                margin-bottom: 5px;
+            }
+            
+            .form-text {
+                font-size: 13px;
+            }
+        }
+        
+        /* Touch target sizes for mobile */
+        input, select, textarea, button, a.btn {
+            min-height: 44px; /* Apple recommended minimum touch target */
+        }
+        
+        /* File upload styling */
+        .custom-file-label::after {
+            content: "Browse";
+        }
+    </style>
+</head>
+<body>
+{% load static %}
+{% load crispy_forms_tags %}
+
+<div class="container settings-container my-3 my-md-5">
+    <h2 class="mb-3 mb-md-4">
+        <i class="fas fa-cog"></i> Employer Account Settings
+    </h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Update Profile -->
+        <div class="col-md-6 mb-3 mb-md-4">
+            <div class="card p-3 p-md-4 shadow-sm">
+                <h4 class="mb-2 mb-md-3"><i class="fas fa-user-edit"></i> Update Profile</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ settings_form|crispy }}
+                    <button type="submit" class="btn btn-primary" name="update_profile">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="col-md-6 mb-3 mb-md-4">
+            <div class="card p-3 p-md-4 shadow-sm">
+                <h4 class="mb-2 mb-md-3"><i class="fas fa-lock"></i> Change Password</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ password_form|crispy }}
+                    <button type="submit" class="btn btn-warning" name="change_password">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Document -->
+    <div class="row">
+        <div class="col-md-6 mb-3 mb-md-4">
+            <div class="card p-3 p-md-4 shadow-sm">
+                <h4 class="mb-2 mb-md-3"><i class="fas fa-file-upload"></i> Upload License File</h4>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ document_form|crispy }}
+                    <button type="submit" class="btn btn-success" name="upload_document">
+                        <i class="fas fa-upload"></i> Upload File
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Mobile-specific JavaScript enhancements -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhance file input for mobile
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+                const label = this.nextElementSibling;
+                if (label && label.classList.contains('custom-file-label')) {
+                    label.textContent = fileName;
+                }
+            });
+        });
+        
+        // Prevent zooming on input focus in mobile
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.fontSize = '16px';
+            });
+        });
+        
+        // Add touch feedback to buttons
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.classList.add('active');
+            });
+            
+            button.addEventListener('touchend', function() {
+                this.classList.remove('active');
+            });
+        });
+    });
+</script>
+</body>
+</html>

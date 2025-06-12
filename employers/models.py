@@ -15,7 +15,7 @@ class EmployerProfile(models.Model):
 
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='employer_profile')
     company_name = models.CharField(max_length=255)
-    employer_type = models.CharField(max_length=50, choices=EMPLOYER_TYPE_CHOICES)  # 👈 update here
+    employer_type = models.CharField(max_length=50, choices=EMPLOYER_TYPE_CHOICES)  
     company_website = models.URLField(blank=True, null=True)
     license_number = models.CharField(max_length=100, blank=True, null=True)
     license_file = models.FileField(upload_to='licenses/', blank=True, null=True)

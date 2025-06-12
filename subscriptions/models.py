@@ -18,7 +18,7 @@ class Plan(models.Model):
     resume_view_limit = models.IntegerField()
     has_ai_access = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    duration = models.CharField(max_length=10, choices=DURATION_CHOICES, default='month')  # ✅ নতুন ফিল্ড
+    duration = models.CharField(max_length=10, choices=DURATION_CHOICES, default='month') 
 
     def __str__(self):
         return f"{self.name} ({self.get_duration_display()})"
@@ -29,13 +29,13 @@ class Subscription(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=True)
-    ai_tokens = models.IntegerField(default=0)  # ✅ নতুন ফিল্ড
+    ai_tokens = models.IntegerField(default=0)  
 
     def __str__(self):
         return f"{self.employer} - {self.plan}"
 
     def consume_token(self, count=1):
-        """✅ একাধিক token কাটতে চাইলে `count` দিয়ে কল করো"""
+       
         if self.ai_tokens >= count:
             self.ai_tokens -= count
             self.save()
@@ -51,10 +51,10 @@ def update_user_ai_access(sender, instance, created, **kwargs):
     user = instance.employer
     if instance.active:
         user.has_ai_access = instance.plan.has_ai_access
-        # ✅ প্ল্যান অনুযায়ী token allocate
+        
         if created:
             if instance.plan.has_ai_access:
-                # টোকেন সংখ্যা প্ল্যান ভিত্তিক নির্ধারণ করা হচ্ছে
+                
                 token_allocation = {
                     'Free': 5,
                     'Standard': 25,

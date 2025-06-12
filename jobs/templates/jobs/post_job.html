@@ -132,9 +132,12 @@
   <div class="mb-3">
     <label for="jobDescription" class="form-label">Job Description</label>
     <textarea id="jobDescription" name="jobDescription" class="form-control" rows="4" required></textarea>
-    <button type="button" id="generateAI" class="btn btn-outline-secondary btn-sm mt-2">✨ Generate with AI</button>
 
+    {% if user.has_ai_access %}
+        <button type="button" id="generateAI" class="btn btn-outline-secondary btn-sm mt-2">✨ Generate with AI</button>
+    {% endif %}
   </div>
+
 
   <div class="mb-3">
     <label for="skills" class="form-label">Skills</label>

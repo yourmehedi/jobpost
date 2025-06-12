@@ -85,17 +85,17 @@ def profile_view(request):
     })
 
 
-@login_required
-def edit_profile(request):
-    jobseeker = request.user.jobseeker_profile  # Ensure related_name is used
-    if request.method == 'POST':
-        form = JobseekerForm(request.POST, instance=jobseeker)
-        if form.is_valid():
-            form.save()
-            return redirect('jobseeker:profile_view')  # Replace with your profile view URL name
-    else:
-        form = JobseekerForm(instance=jobseeker)
-    return render(request, 'jobseekers/edit_profile.html', {'form': form})
+# @login_required
+# def edit_profile(request):
+#     jobseeker = request.user.jobseeker_profile  # Ensure related_name is used
+#     if request.method == 'POST':
+#         form = JobseekerForm(request.POST, instance=jobseeker)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('jobseeker:profile_view')  # Replace with your profile view URL name
+#     else:
+#         form = JobseekerForm(instance=jobseeker)
+#     return render(request, 'jobseekers/edit_profile.html', {'form': form})
 
 @login_required
 def account_settings(request):

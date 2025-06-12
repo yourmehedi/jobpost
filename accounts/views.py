@@ -115,7 +115,10 @@ def jobseeker_register(request):
         passport_number = request.POST.get('passport_number')
         national_id = request.POST.get('national_id')
         document_upload = request.FILES.get('document_upload')
-
+        
+        print(username, email, password, password2, full_name, date_of_birth, 
+              gender, date_of_birth, contact_number, address, job_type_preference, 
+              preferred_city, preferred_country, passport_number, national_id, document_upload)
         # Validation
         if not all([username, email, password, password2, full_name, date_of_birth, gender, contact_number, address]):
             messages.error(request, "Please fill all required fields.")
@@ -135,7 +138,7 @@ def jobseeker_register(request):
 
         # Create user
         user = CustomUser.objects.create_user(username=username, email=email, password=password, user_type='jobseeker')
-
+        
         # Create jobseeker profile
         Jobseeker.objects.create(
             user=user,

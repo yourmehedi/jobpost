@@ -1,415 +1,422 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Job Listings</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <style>
-    .job-card { 
-      border-left: 5px solid #0d6efd;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .job-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .modal-side-slide {
-      position: fixed;
-      margin: 0;
-      width: 50%;
-      max-width: 800px;
-      height: 100vh;
-      transform: translateX(100%);
-      transition: transform 0.3s ease-out;
-    }
-    .modal-side-slide.show {
-      transform: translateX(0);
-    }
-    .advanced-search {
-      transition: all 0.3s ease;
-      overflow: hidden;
-      max-height: 0;
-    }
-    .advanced-search.show {
-      max-height: 500px;
-      padding: 20px 0;
-    }
-    .match-high {
-      background-color: #19875420;
-    }
-    .match-medium {
-      background-color: #ffc10720;
-    }
-    .match-low {
-      background-color: #dc354520;
-    }
-    .salary-badge {
-      background-color: #198754;
-      color: white;
-    }
-    .bookmark-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-    }
-    @media (max-width: 992px) {
-      .modal-side-slide {
-        width: 80%;
-      }
-    }
-    @media (max-width: 768px) {
-      .modal-side-slide {
-        width: 100%;
-      }
-      .job-card {
-        flex-direction: column;
-      }
-      .job-card .text-end {
-        text-align: left !important;
-        margin-top: 1rem;
-      }
-    }
-    .pagination .page-item.active .page-link {
-      background-color: #0d6efd;
-      border-color: #0d6efd;
-    }
-    .pagination .page-link {
-      color: #0d6efd;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Listings</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .job-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .job-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-left: 5px solid #0d6efd;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .match-high {
+            background-color: #19875420;
+        }
+        
+        .match-medium {
+            background-color: #ffc10720;
+        }
+        
+        .match-low {
+            background-color: #dc354520;
+        }
+        
+        .salary-badge {
+            background-color: #198754;
+            color: white;
+        }
+        
+        .bookmark-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            z-index: 1;
+        }
+        
+        .modal-side-slide {
+            position: fixed;
+            margin: 0;
+            width: 50%;
+            max-width: 800px;
+            height: 100vh;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .modal-side-slide.show {
+            transform: translateX(0);
+        }
+        
+        .advanced-search {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            max-height: 0;
+        }
+        
+        .advanced-search.show {
+            max-height: 500px;
+            padding: 20px 0;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #2058a6;
+            border-color: #181b1f;
+            color: white;
+        }
+        
+        .pagination .page-link {
+            color: #1c1f22;
+            font-size: 1.1rem;  
+            font-weight: bold;   
+            padding: 0.5rem 0.75rem; 
+            min-width: 2.5rem;  
+            text-align: center; 
+        }
+        .pagination .page-item:not(.active) .page-link:hover {
+            background-color: #f0f0f0;  
+        }
+        
+
+        @media (max-width: 992px) {
+            .modal-side-slide {
+                width: 80%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .modal-side-slide {
+                width: 100%;
+            }
+            
+            .job-card .text-end {
+                text-align: left !important;
+                margin-top: 1rem;
+            }
+            
+            .job-card-body {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- Job Detail Modal -->
-  <div class="modal fade" id="jobDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-side-slide ms-auto me-0">
-      <div class="modal-content h-100">
-        <div class="modal-header">
-          <h5 class="modal-title">Job Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="job-detail-content">
-          <!-- Content loaded via JavaScript -->
-           
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <a href="#" id="modalApplyBtn" class="btn btn-success">Apply Now</a>
-          <button id="modalSaveBtn" class="btn btn-outline-primary">
-            <i class="bi bi-bookmark"></i> Save
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Job Listings</h2>
-      <div>
-        <span class="badge bg-primary">{{ jobs.paginator.count }} Jobs Found</span>
-      </div>
+<!-- Job Detail Modal -->
+<div class="modal fade" id="jobDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Job Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="job-detail-content">
+                <!-- Content loaded via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="#" id="modalApplyBtn" class="btn btn-success">Apply Now</a>
+                <button id="modalSaveBtn" class="btn btn-outline-primary">
+                    <i class="bi bi-bookmark"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="job-container">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Job Listings</h1>
+            <p class="text-muted">Find your next career opportunity</p>
+        </div>
+        <div>
+            <span class="badge bg-primary">{{ page_obj.paginator.count }} Jobs Found</span>
+        </div>
     </div>
     
     <!-- Search Form with Advanced Options -->
     <form method="get" action="" class="mb-4">
-      <div class="input-group mb-3">
-        <input type="text" name="q" class="form-control" placeholder="Search jobs..." value="{{ query }}">
-        <button type="submit" class="btn btn-primary">
-          <i class="bi bi-search"></i> Search
-        </button>
-        <button type="button" class="btn btn-outline-secondary" id="toggleAdvancedSearch">
-          <i class="bi bi-funnel"></i> Advanced
-        </button>
-      </div>
-      
-      <div class="advanced-search rounded mb-3" id="advancedSearchPanel">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="keyword" class="form-label">Keyword</label>
-            <input type="text" name="keyword" id="keyword" class="form-control" value="{{ request.GET.keyword }}">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="location" class="form-label">Location</label>
-            <input type="text" name="location" id="location" class="form-control" value="{{ request.GET.location }}">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="company" class="form-label">Company Name</label>
-            <input type="text" name="company" id="company" class="form-control" value="{{ request.GET.company }}">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="jobsite" class="form-label">Job Site</label>
-            <input type="text" name="jobsite" id="jobsite" class="form-control" value="{{ request.GET.jobsite }}">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="min_salary" class="form-label">Minimum Salary (₱)</label>
-            <input type="number" name="min_salary" id="min_salary" class="form-control" value="{{ request.GET.min_salary }}">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="max_salary" class="form-label">Maximum Salary (₱)</label>
-            <input type="number" name="max_salary" id="max_salary" class="form-control" value="{{ request.GET.max_salary }}">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="posted" class="form-label">Posted</label>
-            <select name="posted" id="posted" class="form-select">
-              <option value="">Any time</option>
-              <option value="1" {% if request.GET.posted == "1" %}selected{% endif %}>Last 24 hours</option>
-              <option value="7" {% if request.GET.posted == "7" %}selected{% endif %}>Last 7 days</option>
-              <option value="30" {% if request.GET.posted == "30" %}selected{% endif %}>Last 30 days</option>
-              <option value="new" {% if request.GET.posted == "new" %}selected{% endif %}>Newest first</option>
-              <option value="old" {% if request.GET.posted == "old" %}selected{% endif %}>Oldest first</option>
-            </select>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="sort" class="form-label">Sort By</label>
-            <select name="sort" id="sort" class="form-select">
-              <option value="">Relevance</option>
-              <option value="salary_high" {% if request.GET.sort == "salary_high" %}selected{% endif %}>Salary (High to Low)</option>
-              <option value="salary_low" {% if request.GET.sort == "salary_low" %}selected{% endif %}>Salary (Low to High)</option>
-              <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>Newest First</option>
-              <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>Oldest First</option>
-            </select>
-          </div>
-          <div class="col-12 text-end">
-            <button type="reset" class="btn btn-outline-danger me-2">
-              <i class="bi bi-x-circle"></i> Reset
-            </button>
+        <div class="input-group mb-3">
+            <input type="text" name="q" class="form-control" placeholder="Search jobs..." value="{{ request.GET.q }}">
             <button type="submit" class="btn btn-primary">
-              <i class="bi bi-filter"></i> Apply Filters
+                <i class="bi bi-search"></i> Search
             </button>
-          </div>
+            <button type="button" class="btn btn-outline-secondary" id="toggleAdvancedSearch">
+                <i class="bi bi-funnel"></i> Advanced
+            </button>
         </div>
-      </div>
+        
+        <div class="advanced-search rounded mb-3" id="advancedSearchPanel">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" name="location" id="location" class="form-control" value="{{ request.GET.location }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="company" class="form-label">Company</label>
+                    <input type="text" name="company" id="company" class="form-control" value="{{ request.GET.company }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="min_salary" class="form-label">Minimum Salary</label>
+                    <input type="number" name="min_salary" id="min_salary" class="form-control" value="{{ request.GET.min_salary }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="max_salary" class="form-label">Maximum Salary</label>
+                    <input type="number" name="max_salary" id="max_salary" class="form-control" value="{{ request.GET.max_salary }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="job_type" class="form-label">Job Type</label>
+                    <select name="job_type" id="job_type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="full-time" {% if request.GET.job_type == "full-time" %}selected{% endif %}>Full-time</option>
+                        <option value="part-time" {% if request.GET.job_type == "part-time" %}selected{% endif %}>Part-time</option>
+                        <option value="contract" {% if request.GET.job_type == "contract" %}selected{% endif %}>Contract</option>
+                        <option value="internship" {% if request.GET.job_type == "internship" %}selected{% endif %}>Internship</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="experience" class="form-label">Experience Level</label>
+                    <select name="experience" id="experience" class="form-select">
+                        <option value="">All Levels</option>
+                        <option value="entry" {% if request.GET.experience == "entry" %}selected{% endif %}>Entry Level</option>
+                        <option value="mid" {% if request.GET.experience == "mid" %}selected{% endif %}>Mid Level</option>
+                        <option value="senior" {% if request.GET.experience == "senior" %}selected{% endif %}>Senior Level</option>
+                    </select>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="reset" class="btn btn-outline-danger me-2">
+                        <i class="bi bi-x-circle"></i> Reset
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-filter"></i> Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
     </form>
 
     <!-- Job Listings -->
-    {% for job in jobs %}
+    {% for job in page_obj %}
     <div class="card mb-3 job-card shadow-sm position-relative 
                 {% if job.match_score >= 75 %}match-high
                 {% elif job.match_score >= 50 %}match-medium
                 {% elif job.match_score is not None %}match-low{% endif %}">
 
-      <button class="bookmark-btn" data-job-id="{{ job.id }}">
-        <i class="bi {% if job.is_saved %}bi-bookmark-fill text-primary{% else %}bi-bookmark{% endif %}"></i>
-      </button>
+        <button class="bookmark-btn" data-job-id="{{ job.id }}">
+            <i class="bi {% if job.is_saved %}bi-bookmark-fill text-primary{% else %}bi-bookmark{% endif %}"></i>
+        </button>
 
-      <div class="card-body d-flex justify-content-between align-items-start">
-        <div class="flex-grow-1">
-          <h5 class="card-title">{{ job.title }}</h5>
+        <div class="card-body d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+                <h5 class="card-title">{{ job.title }}</h5>
 
-          <p class="mb-1 text-muted">
-            <i class="bi bi-building"></i> {{ job.company.name }}
-            {% if job.company.rating %}
-              <span class="ms-2">
-                {% for i in "12345" %}
-                  <i class="bi bi-star{% if forloop.counter <= job.company.rating|add:"0" %}-fill text-warning{% endif %}"></i>
-                {% endfor %}
-              </span>
-            {% endif %}
-          </p>
+                <p class="mb-1 text-muted">
+                    <i class="bi bi-building"></i> {{ job.company.name }}
+                    {% if job.company.rating %}
+                        <span class="ms-2">
+                            {% for i in "12345" %}
+                                <i class="bi bi-star{% if forloop.counter <= job.company.rating|add:"0" %}-fill text-warning{% endif %}"></i>
+                            {% endfor %}
+                        </span>
+                    {% endif %}
+                </p>
 
-          {% if job.salary %}
-            <p class="mb-1">
-              <span class="badge salary-badge">
-                <i class="bi bi-cash-stack"></i> ₱{{ job.salary }}
-              </span>
-            </p>
-          {% endif %}
+                {% if job.salary %}
+                    <p class="mb-1">
+                        <span class="badge salary-badge">
+                            <i class="bi bi-cash-stack"></i> {{ job.salary }}
+                        </span>
+                    </p>
+                {% endif %}
 
-          <p class="mb-1"><i class="bi bi-geo-alt"></i> {{ job.city }}, {{ job.province }}</p>
+                <p class="mb-1"><i class="bi bi-geo-alt"></i> {{ job.location }}</p>
 
-          {% if job.skill_list %}
-            <p class="mb-1"><strong><i class="bi bi-tools"></i> Skills:</strong>
-              {% for skill in job.skill_list %}
-                <span class="badge bg-secondary me-1">{{ skill }}</span>
-              {% endfor %}
-            </p>
-          {% endif %}
+                {% if job.skills %}
+                    <p class="mb-1"><strong><i class="bi bi-tools"></i> Skills:</strong>
+                        {% for skill in job.skills.split %}
+                            <span class="badge bg-secondary me-1">{{ skill }}</span>
+                        {% endfor %}
+                    </p>
+                {% endif %}
 
-          {% if job.perk_list %}
-            <p class="mb-1"><strong><i class="bi bi-award"></i> Perks:</strong>
-              {% for perk in job.perk_list %}
-                <span class="badge bg-light border me-1 text-dark">{{ perk }}</span>
-              {% endfor %}
-            </p>
-          {% endif %}
-
-          {% if job.match_score is not None %}
-            <div class="progress mt-2" style="height: 10px;">
-              <div class="progress-bar 
-                  {% if job.match_score >= 75 %}bg-success
-                  {% elif job.match_score >= 50 %}bg-warning
-                  {% else %}bg-danger{% endif %}" 
-                  role="progressbar"
-                  style="width: {{ job.match_score }}%" 
-                  aria-valuenow="{{ job.match_score }}" 
-                  aria-valuemin="0" 
-                  aria-valuemax="100">
-              </div>
+                {% if job.match_score is not None %}
+                    <div class="progress mt-2" style="height: 10px;">
+                        <div class="progress-bar 
+                            {% if job.match_score >= 75 %}bg-success
+                            {% elif job.match_score >= 50 %}bg-warning
+                            {% else %}bg-danger{% endif %}" 
+                            role="progressbar"
+                            style="width: {{ job.match_score }}%" 
+                            aria-valuenow="{{ job.match_score }}" 
+                            aria-valuemin="0" 
+                            aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">Match Score: {{ job.match_score }}%</small>
+                {% endif %}
             </div>
-            <small class="text-muted">Match Score: {{ job.match_score }}%</small>
-          {% else %}
-            <span class="badge bg-light text-dark border">No Resume Match Found</span>
-          {% endif %}
-        </div>
 
-        <div class="text-end ms-3">
-          <p class="text-muted small mb-2">
-            <i class="bi bi-clock"></i> {{ job.posted_at|timesince }} ago
-          </p>
-          <button class="btn btn-outline-primary btn-sm view-job-btn" 
-                  data-job-id="{{ job.id }}" 
-                  data-bs-toggle="modal" 
-                  data-bs-target="#jobDetailModal">
-            <i class="bi bi-eye"></i> View Details
-          </button>
+            <div class="text-end ms-3">
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-clock"></i> {{ job.posted_at|timesince }} ago
+                </p>
+                <button class="btn btn-outline-primary btn-sm view-job-btn" 
+                        data-job-id="{{ job.id }}" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#jobDetailModal">
+                    <i class="bi bi-eye"></i> View Details
+                </button>
+            </div>
         </div>
-      </div>
     </div>
     {% empty %}
     <div class="alert alert-info">
-      <i class="bi bi-info-circle"></i> No jobs found matching your criteria.
-      <a href="?" class="alert-link">Clear filters</a>
+        <i class="bi bi-info-circle"></i> No jobs found matching your criteria.
+        <a href="?" class="alert-link">Clear filters</a>
     </div>
     {% endfor %}
 
     <!-- Pagination -->
-      {% for post in page_obj %}
-        <div>
-            <h2>{{ post.title }}</h2>
-            <p>{{ post.content|truncatewords:20 }}</p>
-        </div>
-        <hr>
-    {% empty %}
-        <p>No posts available.</p>
-    {% endfor %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <a class="page-link" href="?page={{ num }}">
+                            <strong>{{ num }}</strong>
+                        </a>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 
-    <div class="pagination">
-        {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; First</a>
-            <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
-        {% endif %}
-
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">Next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
-        {% endif %}
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const toggleBtn = document.getElementById('toggleAdvancedSearch');
-      const advancedPanel = document.getElementById('advancedSearchPanel');
-      const modalContent = document.getElementById('job-detail-content');
-      const modalApplyBtn = document.getElementById('modalApplyBtn');
-      const modalSaveBtn = document.getElementById('modalSaveBtn');
-      const jobModal = new bootstrap.Modal(document.getElementById('jobDetailModal'));
-
-      // Toggle advanced search panel
-      toggleBtn?.addEventListener('click', function () {
-        advancedPanel.classList.toggle('show');
-        this.innerHTML = advancedPanel.classList.contains('show') ?
-          '<i class="bi bi-funnel-fill"></i> Hide Advanced' :
-          '<i class="bi bi-funnel"></i> Advanced';
-      });
-
-      // Initialize advanced panel if any filters are active
-      const hasAdvancedFilters = [
-        'keyword', 'location', 'company', 'jobsite',
-        'min_salary', 'max_salary', 'posted', 'sort'
-      ].some(param => new URLSearchParams(window.location.search).has(param));
-
-      if (hasAdvancedFilters) {
-        advancedPanel?.classList.add('show');
-        toggleBtn.innerHTML = '<i class="bi bi-funnel-fill"></i> Hide Advanced';
-      }
-
-      // Handle view job button clicks
-      document.querySelectorAll('.view-job-btn').forEach(button => {
-        button.addEventListener('click', function () {
-          const jobId = this.getAttribute('data-job-id');
-
-          // Show loading
-          modalContent.innerHTML = `
-            <div class="text-center py-5">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p class="mt-2">Loading job details...</p>
-            </div>
-          `;
-
-          // Update Apply button link
-          if (modalApplyBtn) modalApplyBtn.href = `/jobs/${jobId}/apply/`;
-
-          // Update Save button state
-          const isSaved = this.closest('.job-card')?.querySelector('.bookmark-btn i')?.classList.contains('bi-bookmark-fill');
-          if (modalSaveBtn) {
-            modalSaveBtn.innerHTML = isSaved ?
-              '<i class="bi bi-bookmark-fill"></i> Saved' :
-              '<i class="bi bi-bookmark"></i> Save';
-          }
-
-          // Fetch job details
-          fetch(`/jobs/${jobId}/detail/`, {
-            headers: {
-              'X-Requested-With': 'XMLHttpRequest',
-              'X-CSRFToken': '{{ csrf_token }}'
-            }
-          })
-            .then(response => {
-              if (!response.ok) throw new Error('Network response was not ok');
-              return response.text();
-            })
-            .then(html => {
-              modalContent.innerHTML = html;
-            })
-            .catch(error => {
-              console.error('Error loading job details:', error);
-              modalContent.innerHTML = `
-                <div class="alert alert-danger">
-                  <i class="bi bi-exclamation-triangle"></i> Failed to load job details. Please try again.
-                </div>
-              `;
-            });
-
-          jobModal.show();
-        });
-      });
-
-      // Handle modal save button click
-      modalSaveBtn?.addEventListener('click', function () {
-        const currentJobId = modalApplyBtn?.href?.match(/\/jobs\/(\d+)\//)?.[1];
-        if (currentJobId) {
-          const bookmarkBtn = document.querySelector(`.bookmark-btn[data-job-id="${currentJobId}"]`);
-          bookmarkBtn?.click();
-        }
-      });
-
-      // Modal slide-in animation
-      const jobDetailModal = document.getElementById('jobDetailModal');
-      jobDetailModal?.addEventListener('show.bs.modal', function () {
-        this.querySelector('.modal-side-slide')?.classList.add('show');
-      });
-      jobDetailModal?.addEventListener('hidden.bs.modal', function () {
-        this.querySelector('.modal-side-slide')?.classList.remove('show');
-      });
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Toggle advanced search
+    document.getElementById('toggleAdvancedSearch').addEventListener('click', function() {
+        const panel = document.getElementById('advancedSearchPanel');
+        panel.classList.toggle('show');
     });
-  </script>
+    
+    // Job detail modal functionality
+    document.querySelectorAll('.view-job-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const jobId = this.getAttribute('data-job-id');
+            // Here you would typically fetch the job details via AJAX
+            // For demo purposes, we'll just show a placeholder
+            document.getElementById('job-detail-content').innerHTML = `
+                <h4>${this.closest('.job-card').querySelector('.card-title').textContent}</h4>
+                <p><strong>Company:</strong> ${this.closest('.job-card').querySelector('.text-muted').textContent.trim().replace('★', '')}</p>
+                <p><strong>Location:</strong> ${this.closest('.job-card').querySelector('.bi-geo-alt').parentNode.textContent.trim()}</p>
+                <p><strong>Salary:</strong> ${this.closest('.job-card').querySelector('.salary-badge')?.textContent.trim() || 'Not specified'}</p>
+                <hr>
+                <h5>Job Description</h5>
+                <p>${this.closest('.job-card').querySelector('.card-title').textContent} position at ${this.closest('.job-card').querySelector('.text-muted').textContent.trim().replace('★', '')}. More details would be loaded here from the server.</p>
+                <h5>Requirements</h5>
+                <ul>
+                    <li>Bachelor's degree in related field</li>
+                    <li>${this.closest('.job-card').querySelector('.bi-tools')?.parentNode.textContent.trim() || 'Various skills required'}</li>
+                    <li>Minimum 2 years of experience</li>
+                </ul>
+            `;
+            
+            // Update apply button link
+            document.getElementById('modalApplyBtn').href = `/jobs/${jobId}/apply/`;
+        });
+    });
+    
+    // Bookmark functionality
+    document.querySelectorAll('.bookmark-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('bi-bookmark')) {
+                icon.classList.remove('bi-bookmark');
+                icon.classList.add('bi-bookmark-fill', 'text-primary');
+            } else {
+                icon.classList.remove('bi-bookmark-fill', 'text-primary');
+                icon.classList.add('bi-bookmark');
+            }
+            // Here you would typically send an AJAX request to save/unsave the job
+        });
+    });
+</script>
 </body>
 </html>

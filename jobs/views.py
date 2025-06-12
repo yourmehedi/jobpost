@@ -124,49 +124,17 @@ def job_post_success(request):
     return render(request, 'jobs/job_success.html')
 
 def job_list(request):
-    query = request.GET.get('q', '')
-    job_queryset = Job.objects.select_related('company').filter(status='active').order_by('-posted_at')  # ✅ এখানে ফিল্টার করো
+    jobs = Job.objects.all().order_by('-posted_at')
 
-    subscription = Subscription.objects.filter(employer=request.user, active=True).first()
-
-    if query:
-        job_queryset = job_queryset.filter(
-            Q(title__icontains=query) |
-            Q(company__name__icontains=query)
-        )
-
-    user_resume = Resume.objects.filter(user=request.user).order_by('-uploaded_at').first()
-    resume_skills = user_resume.skills if user_resume else ''
-    resume_experience = user_resume.experience if user_resume else ''
-
-    # for job in job_queryset:
-    #     job.skill_list = job.skills.split(",") if job.skills else []
-    #     job.perk_list = job.perks.split(",") if job.perks else []
-
-    #     if resume_skills:
-    #         job.match_score = calculate_match_score(job.skills, resume_skills, resume_experience)
-    #     else:
-    #         job.match_score = None
-
-    paginator = Paginator(job_queryset, 8)
+    # Pagination
+    paginator = Paginator(jobs, 1)  
     page_number = request.GET.get('page')
-    jobs = paginator.get_page(page_number)
-
-    for job in jobs:  # Only calculate for current page
-        job.skill_list = job.skills.split(",") if job.skills else []
-        job.perk_list = job.perks.split(",") if job.perks else []
-        if resume_skills:
-            job.match_score = calculate_match_score(job.skills, resume_skills, resume_experience)
-        else:
-            job.match_score = None
-
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'jobs/job_list.html', {
+        'page_obj': page_obj,
         'jobs': jobs,
-        'query': query,
-        'user_subscription': subscription
     })
-
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)

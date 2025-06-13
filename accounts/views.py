@@ -183,32 +183,33 @@ def employer_register(request):
 
     return render(request, 'accounts/employer_regis.html', {'form': form})
 
-def login_view(request):
-    message = None
 
+def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        if username and password:
-            user = authenticate(request, username=username, password=password)
-            if user:
-                login(request, user)
+        if not username or not password:
+            messages.error(request, 'Username and password are required.')
+            return render(request, 'accounts/login.html')
 
-                if user.is_superuser or user.user_type == 'superadmin':
-                    return redirect('management:dashboard')
-                elif user.user_type == 'employer':
-                    return redirect('employers:dashboard')
-                elif user.user_type == 'jobseeker':
-                    return redirect('jobseeker:dashboard')
-                else:
-                    message = 'Unknown user type.'
+        user = authenticate(request, username=username, password=password)
+
+        if user:
+            login(request, user)
+
+            if user.is_superuser or getattr(user, 'user_type', None) == 'superadmin':
+                return redirect('management:dashboard')
+            elif getattr(user, 'user_type', None) == 'employer':
+                return redirect('employers:dashboard')
+            elif getattr(user, 'user_type', None) == 'jobseeker':
+                return redirect('jobseeker:dashboard')
             else:
-                message = 'Invalid username or password'
+                messages.error(request, 'Unknown user type.')
         else:
-            message = 'Username and password are required'
+            messages.error(request, 'Invalid username or password.')
 
-    return render(request, 'accounts/login.html', {'message': message})
+    return render(request, 'accounts/login.html')
 
 def logout_view(request):
     return render(request, 'accounts/logout.html')

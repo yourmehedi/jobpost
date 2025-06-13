@@ -1,5 +1,6 @@
 import os
 import textract
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Resume
@@ -85,10 +86,13 @@ def upload_resume(request):
 
 
 def resume_list(request):
-    resumes = Resume.objects.filter(user=request.user)
+    resumes = Resume.objects.filter(user=request.user).order_by('-id') 
 
-    # Split tags for each resume
-    for resume in resumes:
+    paginator = Paginator(resumes, 2)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    for resume in page_obj:
         resume.tag_list = [tag.strip() for tag in resume.tags.split(',')] if resume.tags else []
 
-    return render(request, 'resumes/resume_list.html', {'resumes': resumes})
+    return render(request, 'resumes/resume_list.html', {'page_obj': page_obj})

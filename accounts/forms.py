@@ -1,8 +1,7 @@
-# accounts/forms.py
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from employers.models import EmployerProfile
-from django.contrib.auth.forms import UserCreationForm
 
 class JobseekerRegisterForm(UserCreationForm):
     class Meta:
@@ -18,10 +17,10 @@ class JobseekerRegisterForm(UserCreationForm):
 
 
 class EmployerFullRegisterForm(UserCreationForm):
-    EMPLOYER_TYPE_CHOICES = EmployerProfile.EMPLOYER_TYPE_CHOICES  # 🟢 Reuse from model
+    EMPLOYER_TYPE_CHOICES = EmployerProfile.EMPLOYER_TYPE_CHOICES
 
     company_name = forms.CharField(max_length=255)
-    employer_type = forms.ChoiceField(choices=EMPLOYER_TYPE_CHOICES)  # 👈 ChoiceField here
+    employer_type = forms.ChoiceField(choices=EMPLOYER_TYPE_CHOICES)
     company_website = forms.URLField(required=False)
     license_number = forms.CharField(required=False)
     license_file = forms.FileField(required=False)

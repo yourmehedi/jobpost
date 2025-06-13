@@ -30,11 +30,17 @@ def post_job(request):
     companies = Company.objects.all()
 
     if request.method == 'POST':
-        try:
-            employer = request.user.employer_profile
-        except EmployerProfile.DoesNotExist:
-            message = "You must have an employer account to post a job."
-            return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
+        employer = None
+
+        if request.user.is_superuser:
+            # Allow superuser to post without EmployerProfile
+            employer = None
+        else:
+            try:
+                employer = request.user.employer_profile
+            except EmployerProfile.DoesNotExist:
+                message = "You must have an employer account to post a job."
+                return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
         # Field extraction
         title = request.POST.get('jobTitle')
@@ -77,8 +83,7 @@ def post_job(request):
             message = "Please fill in all required fields."
             return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
-        # ✅ Clean/filter text fields
-        # add ai_access
+        # ✅ Clean text
         clean_description = moderate_text(description)
         clean_skills = moderate_text(skills)
         clean_principal = moderate_text(principal)
@@ -91,7 +96,7 @@ def post_job(request):
         Job.objects.create(
             title=clean_title,
             company=company,
-            employer=employer,
+            employer=employer,  # None for superuser
             description=clean_description,
             location=location,
             formatted_address=formatted_address,

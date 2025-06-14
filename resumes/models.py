@@ -20,5 +20,11 @@ class Resume(models.Model):
     
     ref_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)  # Tracking ID
 
+    @property
+    def file_size(self):
+        if self.file and hasattr(self.file, 'size'):
+            return self.file.size
+        return 0
+
     def __str__(self):
         return f"{self.user.username} - {self.ref_id}"

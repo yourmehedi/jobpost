@@ -158,11 +158,13 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="#" id="modalApplyBtn" class="btn btn-success">Apply Now</a>
-                <button id="modalSaveBtn" class="btn btn-outline-primary">
-                    <i class="bi bi-bookmark"></i> Save
-                </button>
+
+                <a href="#" id="modalApplyBtn" class="btn btn-success" target="_blank">
+                    <i class="bi bi-send-check"></i> Apply Now
+                </a>
+                
             </div>
+
         </div>
     </div>
 </div>
@@ -310,7 +312,58 @@
                         data-bs-target="#jobDetailModal">
                     <i class="bi bi-eye"></i> View Details
                 </button>
+            </div> <br><br>
+            
+            <div class="d-flex justify-content-between align-items-center mt-2">
+
+                <!-- Save Button -->
+                <form action="{% url 'jobs:save_job' %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="job_id" value="{{ job.id }}">
+                    {% if job.id in saved_jobs %}
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-bookmark-fill"></i> Saved
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-bookmark"></i> Save
+                        </button>
+                    {% endif %}
+                </form>
+
+                <br> <br> <br>
+
+                <!-- Share Button -->
+                <div class="position-relative d-inline-block">
+                    <!-- Share Button -->
+                    <button onclick="toggleShareMenu()" class="btn btn-info btn-sm">
+                        <i class="bi bi-share"></i> Share
+                    </button>
+
+                    <!-- Dropdown Share Menu -->
+                    <div id="shareMenu" class="shadow rounded p-2 bg-white position-absolute" style="display: none; z-index: 1000; width: 220px;">
+                        <p class="mb-2">Share this job:</p>
+                        
+                        <!-- Facebook Share -->
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
+                        target="_blank" class="btn btn-primary btn-sm mb-2 w-100">
+                            <i class="bi bi-facebook"></i> Facebook
+                        </a>
+
+                        <!-- Copy Link -->
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="copyLink()">
+                            <i class="bi bi-clipboard"></i> Copy Link
+                        </button>
+
+                        <!-- Hidden Input for Copy -->
+                        <input type="text" id="jobLink" value="{{ request.build_absolute_uri }}" class="form-control mt-2" style="opacity: 0; height: 0;">
+                    </div>
+                </div>
+
+
             </div>
+
+
         </div>
     </div>
     {% empty %}
@@ -371,52 +424,84 @@
 <script>
     // Toggle advanced search
     document.getElementById('toggleAdvancedSearch').addEventListener('click', function() {
-        const panel = document.getElementById('advancedSearchPanel');
-        panel.classList.toggle('show');
+        document.getElementById('advancedSearchPanel').classList.toggle('show');
     });
-    
-    // Job detail modal functionality
+
+    // View job details in modal
     document.querySelectorAll('.view-job-btn').forEach(button => {
         button.addEventListener('click', function() {
             const jobId = this.getAttribute('data-job-id');
-            // Here you would typically fetch the job details via AJAX
-            // For demo purposes, we'll just show a placeholder
+            const jobCard = this.closest('.job-card');
+
             document.getElementById('job-detail-content').innerHTML = `
-                <h4>${this.closest('.job-card').querySelector('.card-title').textContent}</h4>
-                <p><strong>Company:</strong> ${this.closest('.job-card').querySelector('.text-muted').textContent.trim().replace('★', '')}</p>
-                <p><strong>Location:</strong> ${this.closest('.job-card').querySelector('.bi-geo-alt').parentNode.textContent.trim()}</p>
-                <p><strong>Salary:</strong> ${this.closest('.job-card').querySelector('.salary-badge')?.textContent.trim() || 'Not specified'}</p>
+                <h4>${jobCard.querySelector('.card-title').textContent}</h4>
+                <p><strong>Company:</strong> ${jobCard.querySelector('.text-muted').textContent.trim().replace('★', '')}</p>
+                <p><strong>Location:</strong> ${jobCard.querySelector('.bi-geo-alt').parentNode.textContent.trim()}</p>
+                <p><strong>Salary:</strong> ${jobCard.querySelector('.salary-badge')?.textContent.trim() || 'Not specified'}</p>
                 <hr>
                 <h5>Job Description</h5>
-                <p>${this.closest('.job-card').querySelector('.card-title').textContent} position at ${this.closest('.job-card').querySelector('.text-muted').textContent.trim().replace('★', '')}. More details would be loaded here from the server.</p>
+                <p>${jobCard.querySelector('.card-title').textContent} position at ${jobCard.querySelector('.text-muted').textContent.trim().replace('★', '')}. More details would be loaded here from the server.</p>
                 <h5>Requirements</h5>
                 <ul>
                     <li>Bachelor's degree in related field</li>
-                    <li>${this.closest('.job-card').querySelector('.bi-tools')?.parentNode.textContent.trim() || 'Various skills required'}</li>
+                    <li>${jobCard.querySelector('.bi-tools')?.parentNode.textContent.trim() || 'Various skills required'}</li>
                     <li>Minimum 2 years of experience</li>
                 </ul>
             `;
-            
-            // Update apply button link
+
+            // Update buttons dynamically
             document.getElementById('modalApplyBtn').href = `/jobs/${jobId}/apply/`;
+            document.getElementById('modalSaveBtn').setAttribute('data-job-id', jobId);
         });
     });
-    
-    // Bookmark functionality
+
+    document.getElementById('modalShareBtn').addEventListener('click', function () {
+        const jobUrl = window.location.href; // বা নির্দিষ্ট জবের URL
+        if (navigator.share) {
+            navigator.share({
+                title: 'Check out this job!',
+                text: 'I found a job you might be interested in.',
+                url: jobUrl,
+            }).catch((error) => console.log('Sharing failed', error));
+        } else {
+            // যদি Web Share API না থাকে, fallback copy to clipboard
+            navigator.clipboard.writeText(jobUrl).then(() => {
+                alert('Job link copied to clipboard!');
+            });
+        }
+    });
+
+
+    // Bookmark icon toggle (optional demo visual)
     document.querySelectorAll('.bookmark-btn').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             const icon = this.querySelector('i');
-            if (icon.classList.contains('bi-bookmark')) {
-                icon.classList.remove('bi-bookmark');
-                icon.classList.add('bi-bookmark-fill', 'text-primary');
-            } else {
-                icon.classList.remove('bi-bookmark-fill', 'text-primary');
-                icon.classList.add('bi-bookmark');
-            }
-            // Here you would typically send an AJAX request to save/unsave the job
+            icon.classList.toggle('bi-bookmark');
+            icon.classList.toggle('bi-bookmark-fill');
+            icon.classList.toggle('text-primary');
+            // Send AJAX request if needed
         });
     });
+
+    function toggleShareMenu() {
+        const menu = document.getElementById('shareMenu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function copyLink() {
+        const copyText = document.getElementById("jobLink");
+        copyText.style.opacity = 1;
+        copyText.style.height = 'auto';
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile
+        document.execCommand("copy");
+        copyText.style.opacity = 0;
+        copyText.style.height = 0;
+
+        alert("Link copied to clipboard!");
+    }
+
 </script>
 </body>
 </html>

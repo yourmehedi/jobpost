@@ -24,36 +24,29 @@ def plan_list(request):
 
 
 @login_required
-
-@login_required
 def purchase_plan(request, plan_id):
     plan = get_object_or_404(Plan, id=plan_id)
     user = request.user
 
-    # পুরোনো সাবস্ক্রিপশন বন্ধ করছি
-    Subscription.objects.filter(employer=user, active=True).update(active=False)
+    Subscription.objects.filter(user=user, active=True).update(active=False)  # আগে ছিল employer
 
-    # মেয়াদ গণনা
     duration_map = {
         'week': timedelta(weeks=1),
         'month': timedelta(days=30),
         'year': timedelta(days=365),
     }
-    duration = duration_map.get(plan.duration, timedelta(days=30))  # ডিফল্ট ৩০ দিন
 
     start_date = timezone.now()
-    end_date = start_date + duration
+    end_date = start_date + duration_map.get(plan.duration, timedelta(days=30))
 
-    # নতুন সাবস্ক্রিপশন তৈরি করছি
     Subscription.objects.create(
-        employer=user,
+        user=user,  # আগে ছিল employer
         plan=plan,
         start_date=start_date,
         end_date=end_date,
         active=True
     )
 
-    # ইউজারের AI Access আপডেট করছি
     user.has_ai_access = plan.has_ai_access
     user.save()
 

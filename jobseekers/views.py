@@ -70,6 +70,7 @@ def profile_builder(request):
 
 @login_required
 def profile_view(request):
+    print(request.user)
     try:
         jobseeker = request.user.jobseeker_profile
     except:
@@ -83,6 +84,12 @@ def profile_view(request):
         'jobseeker': jobseeker,
         'additional_info': additional_info
     })
+
+@login_required
+def saved_jobs(request):
+    saved = SavedJob.objects.filter(jobseeker=request.user).select_related('job')
+    return render(request, 'jobs/saved_jobs.html', {'saved_jobs': saved})
+
 
 
 # @login_required

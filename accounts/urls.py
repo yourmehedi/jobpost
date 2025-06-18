@@ -1,6 +1,8 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 from . import views
+from .views import login_view
+from .forms import CustomLoginForm
 
 app_name = 'accounts'
 
@@ -15,5 +17,5 @@ urlpatterns = [
     path('employer-registretion-form/', views.employer_register, name='employer_register'),
     path('google-login/', views.google_login, name='google_login'),
     path('logout/', views.logout_view, name='logout'),
-    path('login/', views.login_view, name='login'),
+    path('login/', login_view, name='login'),
 ]

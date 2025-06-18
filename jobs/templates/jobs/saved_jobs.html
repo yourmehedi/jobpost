@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Jobs</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .saved-jobs-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .job-card {
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .job-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .company-name {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+        
+        .job-meta {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .job-meta i {
+            margin-right: 5px;
+            width: 18px;
+            text-align: center;
+        }
+        
+        .empty-state {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .saved-jobs-container {
+                padding: 15px;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .card-body {
+                flex-direction: column;
+            }
+            
+            .text-end {
+                text-align: left !important;
+                margin-top: 15px;
+            }
+            
+            .btn-sm {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-title {
+                font-size: 1.3rem;
+            }
+            
+            .job-meta {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+{% load static %}
+<div class="saved-jobs-container">
+    <h2 class="page-title mb-4"><i class="bi bi-bookmark-fill text-primary me-2"></i>Saved Jobs</h2>
+
+    {% if saved_jobs %}
+        {% for saved in saved_jobs %}
+        <div class="card mb-3 shadow-sm job-card">
+            <div class="card-body d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <h5 class="job-title mb-2">{{ saved.job.title }}</h5>
+                    <p class="company-name mb-2"><i class="bi bi-building"></i> {{ saved.job.company.name }}</p>
+                    
+                    <div class="job-meta">
+                        <p class="mb-1"><i class="bi bi-geo-alt"></i> {{ saved.job.location }}</p>
+                        <p class="mb-0"><i class="bi bi-clock"></i> Saved {{ saved.saved_at|timesince }} ago</p>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <a href="{% url 'jobs:more_detail' saved.job.id %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye"></i> View Job
+                    </a>
+                    <form action="{% url 'jobs:unsave_job' saved.job.id %}" method="POST" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state alert alert-info">
+            <i class="bi bi-info-circle empty-state-icon"></i>
+            <h4>No Saved Jobs Yet</h4>
+            <p class="text-muted">When you save jobs, they'll appear here for easy access.</p>
+            <a href="{% url 'jobs:job_list' %}" class="btn btn-primary mt-2">
+                <i class="bi bi-search"></i> Browse Jobs
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

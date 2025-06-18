@@ -1,0 +1,44 @@
+{% extends 'management/base_admin.html' %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Premium Users with AI Access</h6>
+    </div>
+    <div class="card-body">
+        {% if premium_users %}
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>User Type</th> 
+                            <th>Plan Name</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in premium_users %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ sub.user.get_full_name|default:sub.user.username }}</td>
+                            <td>{{ sub.user.email }}</td>
+                            <td>{{ sub.user.get_user_type_display }}</td> 
+                            <td>{{ sub.plan.name }}</td>
+                            <td>{{ sub.start_date|date:"Y-m-d" }}</td>
+                            <td>{{ sub.end_date|date:"Y-m-d" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No premium users with AI access found.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

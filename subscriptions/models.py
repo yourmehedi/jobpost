@@ -24,18 +24,17 @@ class Plan(models.Model):
         return f"{self.name} ({self.get_duration_display()})"
 
 class Subscription(models.Model):
-    employer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # আগে ছিল employer
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=True)
-    ai_tokens = models.IntegerField(default=0)  
+    ai_tokens = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.employer} - {self.plan}"
+        return f"{self.user} - {self.plan}"
 
     def consume_token(self, count=1):
-       
         if self.ai_tokens >= count:
             self.ai_tokens -= count
             self.save()
@@ -48,13 +47,12 @@ class Subscription(models.Model):
 
 @receiver(post_save, sender=Subscription)
 def update_user_ai_access(sender, instance, created, **kwargs):
-    user = instance.employer
+    user = instance.user  
     if instance.active:
         user.has_ai_access = instance.plan.has_ai_access
-        
+
         if created:
             if instance.plan.has_ai_access:
-                
                 token_allocation = {
                     'Free': 5,
                     'Standard': 25,
@@ -66,3 +64,4 @@ def update_user_ai_access(sender, instance, created, **kwargs):
     else:
         user.has_ai_access = False
     user.save()
+

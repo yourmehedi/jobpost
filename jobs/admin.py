@@ -3,6 +3,7 @@ from .models import *
 
 admin.site.register(Job)
 admin.site.register(Company)
+admin.site.register(SavedJob)
 
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):

@@ -20,7 +20,7 @@ def has_valid_ai_token(user):
 def employer_dashboard(request):
     user = request.user
     profile = EmployerProfile.objects.filter(user=user).first()
-    subscription = Subscription.objects.filter(employer=user, active=True).first()
+    subscription = Subscription.objects.filter(user=request.user, active=True).first()
 
     context = {
         'profile': profile,

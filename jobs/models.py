@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 from accounts.models import CustomUser
 from management.models import Employer
+from jobseekers.models import Jobseeker
 from django.utils import timezone
 from employers.models import EmployerProfile
 
@@ -79,6 +80,17 @@ class JobApplication(models.Model):
     def __str__(self):
         return f"{self.name} applied for {self.job.title}"
     
+
+class SavedJob(models.Model):
+    jobseeker = models.ForeignKey(Jobseeker, on_delete=models.CASCADE)
+    job = models.ForeignKey('Job', on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('jobseeker', 'job') 
+
+    def __str__(self):
+        return f"{self.jobseeker.user.username} saved {self.job.title}"
 
 @property
 def skill_list(self):

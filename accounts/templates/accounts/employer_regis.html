@@ -149,6 +149,11 @@
 <body>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
         
         <h2>Employer Registration</h2>
         

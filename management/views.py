@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model, authenticate, login
 from employers.models import EmployerProfile
+from subscriptions.models import *
 from management.models import Employer
 from jobs.models import Job
 from .models import *
@@ -81,20 +82,25 @@ def user_approval(request):
 
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def employer_verification(request):
-    employers = Employer.objects.filter(approval_status='pending')
+    employers = EmployerProfile.objects.filter(is_approved=False)
     return render(request, 'management/employer_verification.html', {'employers': employers})
 
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def verify_employer(request, id):
-    employer = get_object_or_404(Employer, id=id)
-    employer.approval_status = 'approved'
+    employer = get_object_or_404(EmployerProfile, id=id)
+    employer.is_approved = True
     employer.save()
+
+    # Approve user account too
+    employer.user.is_approved = True
+    employer.user.save()
+
     return redirect('management:employer_verification')
 
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def job_monitoring(request):
     jobs = Job.objects.all()
-    # সব job দেখাবে, employer থাক বা না থাক
+    
     return render(request, 'management/job_monitoring.html', {'jobs': jobs})
 
 
@@ -126,3 +132,18 @@ def delete_job(request, job_id):
     job.delete()
     return redirect('management:job_monitoring')
 
+def ai_token_usage(request):
+    premium_users = Subscription.objects.select_related('user', 'plan').filter(
+        active=True,
+        plan__has_ai_access=True
+    )
+    return render(request, 'management/ai_token_usage.html', {
+        'premium_users': premium_users
+    })
+
+
+def subscription_history(request):
+    subscriptions = Subscription.objects.select_related('plan').filter(user=request.user).order_by('-start_date')  # আগে ছিল employer
+    return render(request, 'management/subscription_history.html', {
+        'subscriptions': subscriptions,
+    })

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect
 import random
 from .models import *
 from django.contrib import messages
@@ -19,6 +20,7 @@ from jobs.utils import calculate_match_score
 from subscriptions.models import Subscription
 from django.template.loader import render_to_string
 from django.http import HttpResponse
+from django.urls import reverse
 
 def has_valid_ai_token(user):
     sub = Subscription.objects.filter(employer=user, active=True).first()
@@ -129,23 +131,120 @@ def job_post_success(request):
     return render(request, 'jobs/job_success.html')
 
 def job_list(request):
-    jobs = Job.objects.all().order_by('-posted_at')
+    query = request.GET.get('q', '')
+    location = request.GET.get('location', '')
+    company = request.GET.get('company', '')
+    job_type = request.GET.get('job_type', '')
+    experience = request.GET.get('experience', '')
+    min_salary = request.GET.get('min_salary')
+    max_salary = request.GET.get('max_salary')
+
+    jobs = Job.objects.all()
+
+    # Apply search filter
+    if query:
+        jobs = jobs.filter(
+            Q(title__icontains=query) |
+            Q(company__name__icontains=query) |
+            Q(description__icontains=query)
+        )
+
+    if location:
+        jobs = jobs.filter(location__icontains=location)
+
+    if company:
+        jobs = jobs.filter(company__name__icontains=company)
+
+    if job_type:
+        jobs = jobs.filter(job_type__iexact=job_type)
+
+    if experience:
+        jobs = jobs.filter(experience_level__iexact=experience)
+
+    if min_salary:
+        jobs = jobs.filter(salary__gte=min_salary)
+
+    if max_salary:
+        jobs = jobs.filter(salary__lte=max_salary)
+
+    jobs = jobs.order_by('-posted_at')
 
     # Pagination
-    paginator = Paginator(jobs, 1)  
+    paginator = Paginator(jobs, 1)  # Change 5 to your desired number per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'jobs/job_list.html', {
         'page_obj': page_obj,
-        'jobs': jobs,
+        'jobs': jobs,  # Optional — আপনি চাইলে শুধু `page_obj` ব্যবহার করলেও চলবে
     })
+
+
+@require_POST
+@login_required
+def save_job(request):
+    job_id = request.POST.get('job_id')
+    print("Received job_id:", job_id)  # Debug
+
+    if not job_id or not job_id.isdigit():
+        return HttpResponseBadRequest("Invalid job ID.")
+
+    job = get_object_or_404(Job, id=job_id)
+
+    # ✅ CustomUser থেকে Jobseeker instance বের করি
+    try:
+        jobseeker = Jobseeker.objects.get(user=request.user)
+    except Jobseeker.DoesNotExist:
+        messages.error(request, "You are not a jobseeker.")
+        return redirect('jobs:job_detail', job_id=job.id)
+
+    # ✅ Job Save/Unsave Logic
+    saved, created = SavedJob.objects.get_or_create(jobseeker=jobseeker, job=job)
+
+    if created:
+        messages.success(request, "Job saved successfully.")
+    else:
+        saved.delete()
+        messages.info(request, "Job removed from saved list.")
+
+    return redirect('jobs:job_detail', job_id=job.id)
 
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id)
-    job.skill_list = job.skills.split(",") if job.skills else []
-    job.perk_list = job.perks.split(",") if job.perks else []
-    return render(request, 'jobs/job_detail.html', {'job': job})
+
+    saved_jobs = []
+    if request.user.is_authenticated:
+        try:
+            jobseeker = Jobseeker.objects.get(user=request.user)
+            saved_jobs = SavedJob.objects.filter(jobseeker=jobseeker).values_list('job_id', flat=True)
+        except Jobseeker.DoesNotExist:
+            saved_jobs = []
+
+    return render(request, 'jobs/job_detail.html', {
+        'job': job,
+        'saved_jobs': saved_jobs,
+    })
+
+def more_detail(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    return render(request, 'jobs/more_detail.html', {'job': job})
+
+@login_required
+def saved_jobs_list(request):
+    jobseeker = request.user.jobseeker_profile  # যেহেতু Jobseeker মডেলে OneToOneField আছে
+    saved_jobs = SavedJob.objects.filter(jobseeker=jobseeker).select_related('job').order_by('-saved_at')
+
+    return render(request, 'jobs/saved_jobs.html', {
+        'saved_jobs': saved_jobs
+    })
+
+@login_required
+def unsave_job(request, job_id):
+    jobseeker = request.user.jobseeker_profile
+    saved_job = get_object_or_404(SavedJob, jobseeker=jobseeker, job__id=job_id)
+    saved_job.delete()
+    messages.info(request, "Job removed from saved list.")
+    return redirect('jobs:saved_jobs_list')
 
 def job_detail_modal(request, job_id):
     job = get_object_or_404(Job, id=job_id)

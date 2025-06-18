@@ -147,6 +147,7 @@ def jobseeker_register(request):
             gender=gender,
             contact_number=contact_number,
             address=address,
+            email=email,
             job_type_preference=job_type_preference,
             preferred_country=preferred_country,
             preferred_city=preferred_city,
@@ -160,12 +161,14 @@ def jobseeker_register(request):
 
     return render(request, 'accounts/jobseeker_regis.html', {'role': 'Job Seeker'})
 
-
 def employer_register(request):
     if request.method == 'POST':
         form = EmployerFullRegisterForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.is_approved = False  # Admin approval pending
+            user.save()
+
             EmployerProfile.objects.create(
                 user=user,
                 company_name=form.cleaned_data['company_name'],
@@ -177,17 +180,19 @@ def employer_register(request):
                 contact_number=form.cleaned_data.get('contact_number'),
                 tin=form.cleaned_data.get('tin')
             )
+
+            messages.info(request, "Registration successful. Please wait for admin approval.")
             return redirect('accounts:login')
     else:
         form = EmployerFullRegisterForm()
 
     return render(request, 'accounts/employer_regis.html', {'form': form})
 
-
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        print(username, password)
 
         if not username or not password:
             messages.error(request, 'Username and password are required.')
@@ -196,6 +201,11 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
 
         if user:
+            # ✅ Only check approval for employer
+            if getattr(user, 'user_type', None) == 'employer' and getattr(user, 'is_approved', False) is False:
+                messages.warning(request, 'Your account is pending admin approval.')
+                return render(request, 'accounts/login.html')
+
             login(request, user)
 
             if user.is_superuser or getattr(user, 'user_type', None) == 'superadmin':
@@ -206,10 +216,13 @@ def login_view(request):
                 return redirect('jobseeker:dashboard')
             else:
                 messages.error(request, 'Unknown user type.')
+                return render(request, 'accounts/login.html')
         else:
             messages.error(request, 'Invalid username or password.')
 
     return render(request, 'accounts/login.html')
+
+
 
 def logout_view(request):
     return render(request, 'accounts/logout.html')

@@ -2,51 +2,203 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { min-height: 100vh; display: flex; flex-direction: column; }
-        .main { flex: 1; display: flex; }
-        .sidebar { width: 250px; background: #343a40; color: #fff; min-height: 100vh; }
-        .sidebar a { color: #ccc; display: block; padding: 10px 20px; text-decoration: none; }
-        .sidebar a:hover { background: #495057; color: #fff; }
-        .content { flex: 1; padding: 20px; }
-        footer { background: #f8f9fa; text-align: center; padding: 10px 0; }
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --accent-color: #2e59d9;
+            --text-dark: #5a5c69;
+            --text-light: #858796;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Topbar */
+        .topbar {
+            height: 70px;
+            background: white;
+            box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.15);
+            z-index: 100;
+        }
+
+        .topbar .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .topbar .home-link {
+            color: var(--text-light);
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .topbar .home-link:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary-color) 10%, #224abe 100%);
+            color: white;
+            min-height: calc(100vh - 70px);
+            box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.15);
+            position: fixed;
+        }
+
+        .sidebar-brand {
+            height: 70px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin: 1rem 0;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            flex-grow: 1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: var(--secondary-color);
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        footer.sticky-footer {
+            margin-left: var(--sidebar-width);
+            background: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 -0.15rem 1.75rem rgba(58, 59, 69, 0.1);
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content, footer.sticky-footer {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
-<header class="bg-primary text-white p-3">
-    <h3 class="m-0">Admin Dashboard /
-        <style>
-            a {
-                font-style: italic;
-                color: #f8f9fa;
-            }
-        </style>
-        <a href="/">Home page</a>
-    </h3>
-</header>
-
-<div class="main">
-    <nav class="sidebar">
-        <h5 class="text-center py-3">Menu</h5>
-        <a href="{% url 'management:dashboard' %}">🏠 Dashboard</a>
-        <a href="{% url 'management:user_approval' %}">👤 User Approval</a>
-        <a href="{% url 'management:employer_verification' %}">🏢 Employer Verification</a>
-        <a href="{% url 'management:job_monitoring' %}">📄 Job Monitoring</a>
-        <a href="{% url 'jobs:applications_dashboard' %}">📥 Requesting Job</a>
+    <!-- Topbar -->
+    <nav class="topbar navbar navbar-expand navbar-light sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i>Admin Panel
+            </a>
+            <div class="ms-auto">
+                <a href="/" class="home-link">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+            </div>
+        </div>
     </nav>
 
-    <div class="content">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-user-shield me-2"></i>Dashboard
+        </div>
+        <div class="sidebar-divider"></div>
+        <nav class="nav flex-column">
+            <a href="{% url 'management:dashboard' %}" class="nav-link">
+                <i class="fas fa-fw fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{% url 'management:user_approval' %}" class="nav-link">
+                <i class="fas fa-fw fa-user-check"></i> User Approval
+            </a>
+            <a href="{% url 'management:employer_verification' %}" class="nav-link">
+                <i class="fas fa-fw fa-building"></i> Employer Verification
+            </a>
+            <a href="{% url 'management:job_monitoring' %}" class="nav-link">
+                <i class="fas fa-fw fa-briefcase"></i> Job Monitoring
+            </a>
+            <a href="{% url 'jobs:applications_dashboard' %}" class="nav-link">
+                <i class="fas fa-fw fa-file-alt"></i> Job Applications
+            </a>
+            <div class="sidebar-divider"></div>
+            <a href="{% url 'management:ai_token_usage' %}" class="nav-link">
+                <i class="fas fa-fw fa-brain"></i> AI Token Usage
+            </a>
+            <a href="{% url 'management:subscription_history' %}"  class="nav-link">
+                <i class="fas fa-fw fa-history"></i> Subscription History
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
         {% block content %}
+        <!-- Your page-specific content will appear here -->
         {% endblock %}
     </div>
-</div>
 
-<footer>
-    <p>&copy; {{ year }} Your Company | Admin Panel</p>
-</footer>
+    <!-- Footer -->
+    <footer class="sticky-footer">
+        <div class="container">
+            <small>&copy; {{ year }} Your Company. All Rights Reserved.</small>
+        </div>
+    </footer>
 
 </body>
 </html>

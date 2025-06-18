@@ -1,50 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>{{ job.title }} - {{ job.company.name }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Action Confirmation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+        }
+        
+        .action-container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .action-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .action-message {
+            font-size: 1.2rem;
+            color: #495057;
+            margin-bottom: 2rem;
+        }
+        
+        .btn-action {
+            padding: 0.5rem 1.5rem;
+            font-size: 1.1rem;
+            min-width: 180px;
+        }
+        
+        .alert-container {
+            max-width: 80%;
+            margin: 0 auto 2rem;
+        }
+        
+        @media (max-width: 576px) {
+            .action-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .action-icon {
+                font-size: 3rem;
+            }
+            
+            .action-title {
+                font-size: 1.5rem;
+            }
+            
+            .action-message {
+                font-size: 1rem;
+            }
+            
+            .alert-container {
+                max-width: 100%;
+            }
+            
+            .btn-action {
+                min-width: 140px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container my-5">
-    <a href="{% url 'jobs:job_list' %}" class="btn btn-secondary mb-4">← Back to Listings</a>
-    <div class="card shadow">
-      <div class="card-body">
-        <h3 class="card-title">{{ job.title }}</h3>
-        <h5 class="text-muted">{{ job.company.name }}</h5>
-        {% if job.salary %}
-          <p class="text-success">Salary: ₱{{ job.salary }}</p>
-        {% endif %}
-        <p><strong>Location:</strong> {{ job.city }}, {{ job.province }}, {{ job.country }}</p>
-        <p><strong>Status:</strong> {{ job.get_status_display }}</p>
-        <p><strong>Vacancies:</strong> {{ job.vacancies }}</p>
-        <p><strong>Experience Level:</strong> {{ job.experience_level }}</p>
-        <p><strong>Job Type:</strong> {{ job.job_type }}</p>
-        <p><strong>Industry:</strong> {{ job.industry }}</p>
-        <p><strong>Valid Passport Required:</strong> {{ job.valid_passport|yesno:"Yes,No" }}</p>
-        <p><strong>English Required:</strong> {{ job.english_required|yesno:"Yes,No" }}</p>
-        <hr>
-        <h5>Description</h5>
-        <p>{{ job.description|linebreaks }}</p>
-        {% if job.skill_list %}
-          <p><strong>Skills:</strong>
-            {% for skill in job.skill_list %}
-              <span class="badge bg-secondary me-1">{{ skill }}</span>
-            {% endfor %}
-          </p>
-        {% endif %}
-        {% if job.perk_list %}
-          <p><strong>Perks:</strong>
-            {% for perk in job.perk_list %}
-              <span class="badge bg-light border me-1 text-dark">{{ perk }}</span>
-            {% endfor %}
-          </p>
-        {% endif %}
-        <div class="mt-4">
-          <a href="{% url 'jobs:apply' job.id %}" class="btn btn-success">Apply Now</a>
+    <div class="container">
+        <div class="action-container">
+            {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <i class="bi bi-check-circle-fill action-icon text-success"></i>
+                            <h1 class="action-title text-success">Job Saved!</h1>
+                        {% else %}
+                            <i class="bi bi-trash-fill action-icon text-danger"></i>
+                            <h1 class="action-title text-danger">Job Removed!</h1>
+                        {% endif %}
+                        
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="action-message">
+                
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{% url 'jobs:job_list' %}" class="btn btn-primary btn-action">
+                    <i class="bi bi-briefcase me-2"></i>Browse Jobs
+                </a>
+                <a href="" class="btn btn-success btn-action">
+                    <i class="bi bi-bookmark-check me-2"></i>Saved Jobs
+                </a>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

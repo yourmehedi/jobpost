@@ -1,4 +1,7 @@
 
+
+# subscription/admin.py
+
 from django.contrib import admin
 from .models import Plan, Subscription
 
@@ -8,4 +11,4 @@ class PlanAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('employer', 'plan', 'start_date', 'active')
+    list_display = ('user', 'plan', 'start_date', 'active') 

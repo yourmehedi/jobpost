@@ -97,7 +97,6 @@ def upload_resume(request):
 
     return render(request, 'resumes/upload.html')
 
-
 def resume_list(request):
     resumes = Resume.objects.filter(user=request.user).order_by('-id')
 
@@ -107,5 +106,5 @@ def resume_list(request):
 
     for resume in page_obj:
         resume.tag_list = [tag.strip() for tag in resume.tags.split(',')] if resume.tags else []
-
-    return render(request, 'resumes/resume_list.html', {'page_obj': page_obj})
+    
+    return render(request, 'resumes/resume_list.html', {'resumes': page_obj})

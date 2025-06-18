@@ -1,0 +1,51 @@
+{% extends 'management/base_admin.html' %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Subscription History</h6>
+    </div>
+    <div class="card-body">
+        {% if subscriptions %}
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Plan Name</th>
+                            <th>Duration</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>User Type</th>
+                            <th>AI Tokens</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in subscriptions %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ sub.plan.name }}</td>
+                            <td>{{ sub.plan.duration|title }}</td>
+                            <td>{{ sub.start_date|date:"Y-m-d" }}</td>
+                            <td>{{ sub.end_date|date:"Y-m-d" }}</td>
+                            <td>
+                                {% if sub.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ sub.user.user_type|title }}</td>  <!-- নতুন -->
+                            <td>{{ sub.ai_tokens }}</td>  <!-- নতুন -->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No subscription history available.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

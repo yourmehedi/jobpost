@@ -2,14 +2,24 @@
 
 {% block content %}
 <h3>Pending Users</h3>
+
+<p>Total pending: {{ users|length }}</p>
+
 <table class="table">
     <tr><th>Username</th><th>Email</th><th>Action</th></tr>
-    {% for user in users %}
-    <tr>
-        <td>{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td><a class="btn btn-success" href="{% url 'approve_user' user.id %}">Approve</a></td>
-    </tr>
-    {% endfor %}
+
+    {% if users %}
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                <a class="btn btn-success" href="{% url 'management:approve_user' user.id %}">Approve</a>
+            </td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <tr><td colspan="3">No pending users found.</td></tr>
+    {% endif %}
 </table>
 {% endblock %}

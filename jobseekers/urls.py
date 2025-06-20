@@ -10,4 +10,5 @@ urlpatterns = [
     # path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('settings/', views.account_settings, name='account_settings'),
     path('saved_jobs', views.saved_jobs, name='saved_jobs'),
+    path('telegram/', views.telegram_settings, name='telegram_settings'),
 ]

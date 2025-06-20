@@ -8,12 +8,16 @@ from django.contrib.auth import get_user_model, authenticate, login
 from employers.models import EmployerProfile
 from subscriptions.models import *
 from management.models import Employer
+from accounts.forms import UserEditForm
 from jobs.models import Job
 from .models import *
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 User = get_user_model()
-  
+
+def is_superadmin(user):
+    return user.is_authenticated and user.is_superadmin 
+ 
 @login_required
 def home(request):
     print(request.user)
@@ -75,10 +79,109 @@ def superuser_login_view(request):
 
     return render(request, 'management/superuser_login.html')
 
+
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
+def all_users(request):
+    users = User.objects.all().order_by('-date_joined') 
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        user = get_object_or_404(CustomUser, id=user_id)
+
+        if action == 'edit':
+            form = UserEditForm(request.POST, instance=user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, f"{user.username} updated successfully.")
+                return redirect('management:all_users')
+        elif action == 'activate':
+            user.is_active = True
+            user.save()
+            messages.success(request, f"{user.username} activated.")
+            return redirect('management:all_users')
+        elif action == 'deactivate':
+            user.is_active = False
+            user.save()
+            messages.warning(request, f"{user.username} deactivated.")
+            return redirect('management:all_users')
+        elif action == 'delete':
+            user.delete()
+            messages.error(request, f"User deleted.")
+            return redirect('management:all_users')
+    else:
+        edit_forms = {user.id: UserEditForm(instance=user).as_p() for user in users}
+        return render(request, 'management/all_users.html', {
+            'users': users,
+            'edit_forms': edit_forms,
+        })
+     
+    return render(request, 'management/all_users.html', {'users': users})
+
+@user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
+def edit_user(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"{user.username} updated successfully.")
+            return redirect('management:all_users')  # redirect যেখানে লিস্ট দেখান হয়
+    else:
+        form = UserEditForm(instance=user)
+
+    return render(request, 'management/edit_user.html', {
+        'form': form,
+        'user_obj': user,
+    })
+
+# @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
+# def all_users(request):
+#     users = CustomUser.objects.all().order_by('-date_joined')
+
+#     if request.method == 'POST':
+#         user_id = request.POST.get('user_id')
+#         action = request.POST.get('action')
+#         user = get_object_or_404(CustomUser, id=user_id)
+
+#         if action == 'edit':
+#             form = UserEditForm(request.POST, instance=user)
+#             if form.is_valid():
+#                 form.save()
+#                 messages.success(request, f"{user.username} updated successfully.")
+#                 return redirect('management:all_users')
+#         elif action == 'activate':
+#             user.is_active = True
+#             user.save()
+#             messages.success(request, f"{user.username} activated.")
+#             return redirect('management:all_users')
+#         elif action == 'deactivate':
+#             user.is_active = False
+#             user.save()
+#             messages.warning(request, f"{user.username} deactivated.")
+#             return redirect('management:all_users')
+#         elif action == 'delete':
+#             user.delete()
+#             messages.error(request, f"User deleted.")
+#             return redirect('management:all_users')
+#     else:
+#         edit_forms = {user.id: UserEditForm(instance=user).as_p() for user in users}
+#         return render(request, 'management/all_users.html', {
+#             'users': users,
+#             'edit_forms': edit_forms,
+#         })
+    
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def user_approval(request):
-    users = User.objects.filter(is_active=False)
+    users = User.objects.filter(is_active=False, is_superuser=False)
     return render(request, 'management/user_approval.html', {'users': users})
+
+def approve_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.is_active = True
+    user.save()
+    return redirect('user_approval') 
 
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def employer_verification(request):
@@ -106,12 +209,6 @@ def job_monitoring(request):
 
 
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
-def approve_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    user.is_active = True
-    user.save()
-    return redirect('management:user_approval')
-
 def review_user_jobs(request, employer_id):
     employer = get_object_or_404(Employer, id=employer_id)
     jobs = Job.objects.filter(employer=employer)

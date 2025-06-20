@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Notification Settings</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .telegram-card {
+            border: 1px solid rgba(0, 136, 204, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .telegram-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 136, 204, 0.1);
+        }
+        
+        /* Custom checkbox styling */
+        .checkbox-container input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-container input[type="checkbox"]:checked {
+            background-color: #0088cc;
+            border-color: #0088cc;
+        }
+        
+        .checkbox-container input[type="checkbox"]:checked::after {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+        }
+        
+        /* Mobile specific adjustments */
+        @media (max-width: 640px) {
+            .telegram-card {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .btn-telegram, .btn-back {
+                width: 100%;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            input[type="text"], input[type="checkbox"] {
+                font-size: 16px; /* Prevent zoom on focus in mobile */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10 telegram-card">
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'jobseeker:account_settings' %}" class="btn-back inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Settings
+            </a>
+        </div>
+        
+        <div class="flex items-center mb-6">
+            <i class="fab fa-telegram text-3xl text-[#0088cc] mr-3"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Telegram Notification Settings</h2>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="telegram_chat_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    Telegram Chat ID
+                    <span class="text-xs text-gray-500 ml-1">(required for notifications)</span>
+                </label>
+                <div class="relative">
+                    <input type="text" name="telegram_chat_id" id="telegram_chat_id"
+                        value="{{ user.telegram_chat_id }}" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="e.g. 123456789">
+                    <button type="button" onclick="showChatIdHelp()" 
+                            class="absolute right-3 top-3 text-gray-400 hover:text-blue-600">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+                <p class="mt-2 text-xs text-gray-500 hidden" id="chatIdHelp">
+                    To find your Telegram Chat ID, start a conversation with our bot @YourBotName and send the /start command.
+                </p>
+            </div>
+
+            <div class="checkbox-container flex items-center mb-6">
+                <input type="checkbox" name="telegram_enabled" id="telegram_enabled"
+                    {% if user.telegram_enabled %}checked{% endif %}>
+                <label for="telegram_enabled" class="ml-3 text-gray-700 font-medium">
+                    Enable Telegram Notifications
+                </label>
+            </div>
+
+            <div class="flex items-center justify-between button-group">
+                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <i class="fas fa-robot mr-1"></i> Connect with our Telegram Bot
+                </a>
+                <button type="submit"
+                        class="btn-telegram bg-[#0088cc] hover:bg-[#0077b5] text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-save mr-2"></i> Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help modal (hidden by default) -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">How to find your Telegram Chat ID</h3>
+                <button onclick="hideChatIdHelp()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <ol class="list-decimal pl-5 space-y-2 text-sm text-gray-700">
+                <li>Start a conversation with our bot @YourBotName</li>
+                <li>Send the command <code class="bg-gray-100 px-1 rounded">/start</code></li>
+                <li>The bot will reply with your Chat ID</li>
+                <li>Copy and paste that ID into the field above</li>
+            </ol>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500">Note: You must initiate the conversation first.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showChatIdHelp() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+        
+        function hideChatIdHelp() {
+            document.getElementById('helpModal').classList.add('hidden');
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('helpModal');
+            if (event.target === modal) {
+                hideChatIdHelp();
+            }
+        }
+        
+        // Show/hide simple help text
+        function toggleSimpleHelp() {
+            const helpText = document.getElementById('chatIdHelp');
+            helpText.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

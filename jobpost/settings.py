@@ -36,6 +36,8 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
+# telegram bot token
+TELEGRAM_BOT_TOKEN = '8112027941:AAHnG2bRyOLH_okVXLBji81oin0HelpC6zk'
 
 # Application definition
 

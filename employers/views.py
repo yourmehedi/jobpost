@@ -9,7 +9,7 @@ from subscriptions.models import Subscription
 from django.contrib.auth import update_session_auth_hash
 
 
-User = get_user_model()  
+User = get_user_model() 
 
 def has_valid_ai_token(user):
     sub = Subscription.objects.filter(employer=user, active=True).first()
@@ -81,4 +81,29 @@ def employer_settings(request):
         'settings_form': settings_form,
         'password_form': password_form,
         'document_form': document_form,
+    })
+
+
+
+@login_required
+def telegram_settings(request):
+    user = request.user
+
+    if not user.is_employer:
+        messages.error(request, "Only employers can access this page.")
+        return redirect('employers:dashboard')
+
+    if request.method == 'POST':
+        telegram_chat_id = request.POST.get('telegram_chat_id')
+        telegram_enabled = bool(request.POST.get('telegram_enabled'))
+
+        user.telegram_chat_id = telegram_chat_id
+        user.telegram_enabled = telegram_enabled
+        user.save()
+
+        messages.success(request, "Telegram settings updated.")
+        return redirect('employers:telegram_settings')
+
+    return render(request, 'employers/telegram_settings.html', {
+        'user': user
     })

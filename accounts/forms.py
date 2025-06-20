@@ -44,3 +44,12 @@ class CustomLoginForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
         if not user.is_approved:
             raise ValidationError("Your account is pending approval by the admin.", code='inactive')
+
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = [
+            'username', 'email', 'user_type', 'has_ai_access', 'is_verified',
+            'is_approved', 'telegram_chat_id', 'telegram_enabled', 'is_staff', 'is_superuser'
+        ]

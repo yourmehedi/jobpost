@@ -21,6 +21,13 @@
             padding: 20px;
         }
         
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
         .card {
             border-radius: 10px;
             border: none;
@@ -54,6 +61,17 @@
             margin-right: 8px;
         }
         
+        .btn-help {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        
+        .btn-help:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+        
         .alert {
             border-radius: 8px;
         }
@@ -62,6 +80,12 @@
         @media (max-width: 768px) {
             .settings-container {
                 padding: 15px;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
             }
             
             .card {
@@ -123,9 +147,15 @@
 {% load crispy_forms_tags %}
 
 <div class="container settings-container my-3 my-md-5">
-    <h2 class="mb-3 mb-md-4">
-        <i class="fas fa-cog"></i> Employer Account Settings
-    </h2>
+    <!-- Updated Header with Help Button -->
+    <div class="header-container">
+        <h2 class="mb-0">
+            <i class="fas fa-cog"></i> Employer Account Settings
+        </h2>
+        <a href="{% url 'employers:telegram_settings' %}" class="btn btn-telegram">
+                <i class="fab fa-telegram"></i> Telegram Notification
+            </a>
+    </div>
 
     {% if messages %}
         {% for message in messages %}

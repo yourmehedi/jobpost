@@ -16,12 +16,14 @@
             --success-color: #2ecc71;
             --warning-color: #f39c12;
             --danger-color: #e74c3c;
+            --telegram-color: #0088cc;
         }
         
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
+            padding-bottom: 40px;
         }
         
         .settings-container {
@@ -37,6 +39,15 @@
             }
         }
         
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
         .settings-card {
             background: white;
             border-radius: 10px;
@@ -44,6 +55,12 @@
             padding: 25px;
             margin-bottom: 30px;
             border-top: 4px solid var(--primary-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .settings-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
         }
         
         .password-card {
@@ -52,6 +69,10 @@
         
         .document-card {
             border-top-color: var(--success-color);
+        }
+        
+        .telegram-card {
+            border-top-color: var(--telegram-color);
         }
         
         .settings-title {
@@ -73,12 +94,13 @@
         
         .btn {
             border-radius: 6px;
-            padding: 8px 20px;
+            padding: 10px 20px;
             font-weight: 500;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-width: 120px;
         }
         
         .btn i {
@@ -101,6 +123,18 @@
             border-color: var(--success-color);
         }
         
+        .btn-telegram {
+            background-color: var(--telegram-color);
+            border-color: var(--telegram-color);
+            color: white;
+        }
+        
+        .btn-telegram:hover {
+            background-color: #0077b5;
+            border-color: #0077b5;
+            color: white;
+        }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -114,6 +148,15 @@
         
         /* Mobile specific styles */
         @media (max-width: 767px) {
+            .settings-container {
+                padding: 15px;
+            }
+            
+            .settings-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
             .settings-card {
                 padding: 20px 15px;
             }
@@ -127,22 +170,55 @@
                 width: 100%;
                 margin-top: 10px;
             }
-            
-            .row > div {
-                padding-left: 0;
-                padding-right: 0;
-            }
         }
         
-        /* Crispy forms adjustment */
+        /* Form controls */
         .form-control {
             border-radius: 6px;
             padding: 10px 15px;
+            border: 1px solid #ced4da;
         }
         
         .form-control:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        /* File upload styling */
+        .file-upload-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: 15px;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .file-upload-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        /* Checkbox styling */
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
         }
     </style>
 </head>
@@ -151,9 +227,17 @@
     {% load crispy_forms_tags %}
 
     <div class="container settings-container">
-        <h2 class="mb-4">
-            <i class="fas fa-cog"></i> Account Settings
-        </h2>
+        <div class="settings-header">
+            <h2 class="mb-0">
+                <i class="fas fa-cog"></i> Employer Account Settings
+            </h2>
+            <div class="d-flex gap-2">
+                <a href="{% url 'jobseeker:telegram_settings' %}" class="btn btn-telegram">
+                    <i class="fab fa-telegram"></i> Telegram Notification
+                </a>
+                
+            </div>
+        </div>
 
         {% if messages %}
             {% for message in messages %}
@@ -207,11 +291,46 @@
                     </h4>
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        {{ document_form|crispy }}
+                        <div class="file-upload-wrapper mb-3">
+                            <label class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                <div class="fw-bold">Click to upload document</div>
+                                <div class="small text-muted">PDF, DOC, JPG, PNG (Max. 5MB)</div>
+                                <input type="file" name="document" class="file-upload-input" id="id_document">
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_document_name" class="form-label">Document Name</label>
+                            <input type="text" name="document_name" class="form-control" id="id_document_name" placeholder="e.g. Business License">
+                        </div>
                         <button type="submit" class="btn btn-success" name="upload_document">
                             <i class="fas fa-upload"></i> Upload Document
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Telegram Settings Preview -->
+            <div class="col-md-6">
+                <div class="settings-card telegram-card">
+                    <h4 class="settings-title">
+                        <i class="fab fa-telegram"></i> Telegram Notifications
+                    </h4>
+                    <div class="mb-3">
+                        <p><strong>Status:</strong> 
+                            {% if user.telegram_enabled %}
+                                <span class="text-success">Active</span>
+                            {% else %}
+                                <span class="text-secondary">Inactive</span>
+                            {% endif %}
+                        </p>
+                        {% if user.telegram_chat_id %}
+                            <p><strong>Chat ID:</strong> {{ user.telegram_chat_id }}</p>
+                        {% endif %}
+                    </div>
+                    <a href="/telegram-settings" class="btn btn-telegram">
+                        <i class="fas fa-cog"></i> Configure Telegram
+                    </a>
                 </div>
             </div>
         </div>
@@ -219,5 +338,33 @@
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Enhance file input display
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.querySelector('.file-upload-input');
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+                    const label = this.parentElement.querySelector('.fw-bold');
+                    if (label) {
+                        label.textContent = fileName;
+                    }
+                });
+            }
+            
+            // Add touch feedback to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.classList.add('active');
+                });
+                
+                button.addEventListener('touchend', function() {
+                    this.classList.remove('active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>

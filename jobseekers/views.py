@@ -18,15 +18,14 @@ def profile_builder(request):
     user = request.user
 
     try:
-        jobseeker = user.jobseeker
+        jobseeker = request.user.jobseeker_profile
     except Jobseeker.DoesNotExist:
-        jobseeker = None  # আমরা POST-এর সময় তৈরি করব
+        jobseeker = None  
 
     if request.method == 'POST':
         if not jobseeker:
             jobseeker = Jobseeker(user=user)
 
-        # প্রোফাইল তথ্য সংরক্ষণ
         jobseeker.full_name = request.POST.get('full_name')
         jobseeker.date_of_birth = request.POST.get('dob')
         jobseeker.gender = request.POST.get('gender')
@@ -41,16 +40,14 @@ def profile_builder(request):
         if request.FILES.get('document'):
             jobseeker.document_upload = request.FILES['document']
 
-        # তারিখ সঠিক ফর্ম্যাটে রূপান্তর
         if isinstance(jobseeker.date_of_birth, str):
             try:
                 jobseeker.date_of_birth = datetime.strptime(jobseeker.date_of_birth, '%Y-%m-%d').date()
             except ValueError:
-                pass  # ভুল ডেট থাকলে save এর আগে error handle করুন
+                pass 
 
         jobseeker.save()
 
-        # অতিরিক্ত তথ্য
         about = request.POST.get('about_me')
         achievements = request.POST.get('achievements')
         hobbies = request.POST.get('hobbies')
@@ -180,4 +177,29 @@ def dashboard(request):
     return render(request, 'jobseekers/dashboard.html', {
         'jobseeker': jobseeker,
         'recommended_jobs': recommended[:6]  # Show top 6
+    })
+
+
+
+@login_required
+def telegram_settings(request):
+    user = request.user
+
+    if not user.is_jobseeker:
+        messages.error(request, "Only jobseekers can access this page.")
+        return redirect('jobseeker:dashboard')  
+
+    if request.method == 'POST':
+        telegram_chat_id = request.POST.get('telegram_chat_id')
+        telegram_enabled = bool(request.POST.get('telegram_enabled'))
+
+        user.telegram_chat_id = telegram_chat_id
+        user.telegram_enabled = telegram_enabled
+        user.save()
+
+        messages.success(request, "Telegram settings updated.")
+        return redirect('jobseeker:telegram_settings')
+
+    return render(request, 'jobseekers/telegram_settings.html', {
+        'user': user
     })

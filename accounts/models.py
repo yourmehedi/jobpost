@@ -32,6 +32,8 @@ class CustomUser(AbstractUser):
     has_ai_access = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
+    telegram_chat_id = models.CharField(max_length=100, blank=True, null=True)
+    telegram_enabled = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'

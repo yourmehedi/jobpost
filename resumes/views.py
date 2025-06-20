@@ -88,7 +88,9 @@ def upload_resume(request):
             jobseeker.save()
 
             messages.success(request, "Resume uploaded and processed successfully.")
+            return redirect('resumes:resume_success')
 
+        
         except Exception as e:
             print("Resume parsing error:", e)
             messages.error(request, "There was an error processing your resume.")
@@ -97,14 +99,18 @@ def upload_resume(request):
 
     return render(request, 'resumes/upload.html')
 
+def resume_success(request):
+    return render(request, 'resumes/seccess.html')
+
 def resume_list(request):
     resumes = Resume.objects.filter(user=request.user).order_by('-id')
 
-    paginator = Paginator(resumes, 2)
+    paginator = Paginator(resumes, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     for resume in page_obj:
         resume.tag_list = [tag.strip() for tag in resume.tags.split(',')] if resume.tags else []
     
-    return render(request, 'resumes/resume_list.html', {'resumes': page_obj})
+    return render(request, 'resumes/resume_list.html', {'page_obj': page_obj})
+

@@ -185,9 +185,7 @@
             <a href="{% url 'management:dashboard' %}" class="nav-link">
                 <i class="fas fa-fw fa-tachometer-alt"></i> Dashboard
             </a>
-            <a href="{% url 'management:user_approval' %}" class="nav-link">
-                <i class="fas fa-fw fa-user-check"></i> User Approval
-            </a>
+            
             <a href="{% url 'management:all_users' %}" class="nav-link">
                 <i class="fas fa-fw fa-user-check"></i> All Users
             </a>
@@ -199,16 +197,6 @@
             </a>
             <a href="{% url 'jobs:applications_dashboard' %}" class="nav-link">
                 <i class="fas fa-fw fa-file-alt"></i> Job Applications
-            </a>
-            <a href="{% url 'jobseeker:telegram_settings' %}" class="nav-link">
-                <i class="fab fa-telegram fa-fw" style="color: #0088cc;"></i>
-                <span class="ml-2">Telegram (Jobseeker)</span>
-            </a>
-            <a href="{% url 'employers:telegram_settings' %}" class="nav-link">
-                <i class="fab fa-telegram fa-fw" style="color: #0088cc;"></i>
-                <span class="ml-2">Telegram (Employer)</span>
-            </a>
-            <div class="sidebar-divider"></div>
             <a href="{% url 'management:ai_token_usage' %}" class="nav-link">
                 <i class="fas fa-fw fa-brain"></i> AI Token Usage
             </a>

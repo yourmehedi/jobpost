@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect
+from .forms import JobForm
 import random
 from .models import *
 from django.contrib import messages
@@ -177,6 +178,51 @@ def job_list(request):
     return render(request, 'jobs/job_list.html', {
         'page_obj': page_obj,
         'jobs': jobs,  # Optional — আপনি চাইলে শুধু `page_obj` ব্যবহার করলেও চলবে
+    })
+
+
+@login_required
+def employer_job_list(request, user_id):
+    employer = get_object_or_404(User, id=user_id)
+    jobs = Job.objects.filter(posted_by=employer).order_by('-posted_at')
+    return render(request, 'jobs/user_job_list.html', {
+        'employer': employer,
+        'jobs': jobs,
+    })
+
+
+@login_required
+def delete_job(request, job_id): 
+    job = get_object_or_404(Job, id=job_id)
+
+    if request.user == job.posted_by or request.user.is_staff:
+        job.delete()
+        messages.success(request, "Job deleted successfully.")
+    else:
+        messages.error(request, "You are not authorized to delete this job.")
+
+    return redirect('employer_job_list', user_id=request.user.id)
+
+def edit_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+
+    
+    if request.user != job.posted_by and not request.user.is_staff:
+        messages.error(request, "You are not authorized to edit this job.")
+        return redirect('jobs:employer_job_list', user_id=request.user.id)
+
+    if request.method == 'POST':
+        form = JobForm(request.POST, instance=job)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Job updated successfully.")
+            return redirect('jobs:employer_job_list', user_id=request.user.id)
+    else:
+        form = JobForm(instance=job)
+
+    return render(request, 'jobs/edit_job.html', {
+        'form': form,
+        'job': job
     })
 
 

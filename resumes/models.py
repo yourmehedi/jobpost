@@ -3,13 +3,18 @@ import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.utils import timezone
 User = get_user_model()
 
 class Resume(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='resumes_uploaded'
+    )
     file = models.FileField(upload_to='resumes/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    
+
     # AI Parsed Fields
     full_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
@@ -17,9 +22,12 @@ class Resume(models.Model):
     skills = models.TextField(blank=True, null=True)
     experience = models.TextField(blank=True, null=True)
     education = models.TextField(blank=True, null=True)
-    tags = models.TextField(blank=True, null=True)  # Auto-generated tags (comma-separated)
-    
-    ref_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)  # Tracking ID
+    tags = models.TextField(blank=True, null=True)
+
+    ref_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+    posted_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resumes_posted')
 
     @property
     def file_size(self):

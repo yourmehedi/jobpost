@@ -261,8 +261,8 @@
                             <a href="{% url 'jobs:post_job' %}" class="btn btn-outline-primary">
                                 <i class="fas fa-plus"></i> Post New Job
                             </a>
-                            <a href="{% url 'jobs:job_list' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-briefcase"></i> Manage Jobs
+                            <a href="{% url 'jobs:employer_job_list' user.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-briefcase"></i> See Posted Job
                             </a>
                             <a href="{% url 'employers:settings' %}" class="btn btn-outline-dark">
                                 <i class="fas fa-cog"></i> Settings

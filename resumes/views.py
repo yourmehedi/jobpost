@@ -2,11 +2,12 @@ import os
 import fitz  # PyMuPDF
 import textract
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
 from .models import Resume
+from django.contrib.auth.models import User
 from .utils import (
     extract_email, extract_phone, extract_name,
     extract_skills, extract_experience, extract_education, generate_tags,
@@ -64,6 +65,7 @@ def upload_resume(request):
             # ✅ Save to Resume model
             Resume.objects.create(
                 user=request.user,
+                posted_by=request.user,
                 file=uploaded_file,
                 full_name=full_name,
                 email=email,
@@ -114,3 +116,22 @@ def resume_list(request):
     
     return render(request, 'resumes/resume_list.html', {'page_obj': page_obj})
 
+@login_required
+def jobseeker_resume_list(request, user_id):
+    resumes = Resume.objects.filter(posted_by__id=user_id).order_by('-uploaded_at')
+    return render(request, 'resumes/jobseeker_resume_list.html', {
+        'resumes': resumes
+    })
+
+
+@login_required
+def delete_resume(request, resume_id):
+    resume = get_object_or_404(Resume, id=resume_id)
+
+    if request.user == resume.posted_by or request.user.is_staff:
+        resume.delete()
+        messages.success(request, "Resume deleted successfully.")
+    else:
+        messages.error(request, "You are not authorized to delete this resume.")
+
+    return redirect('resumes:jobseeker_resume_list', user_id=request.user.id)

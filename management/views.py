@@ -207,7 +207,6 @@ def job_monitoring(request):
     return render(request, 'management/job_monitoring.html', {'jobs': jobs})
 
 
-
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def review_user_jobs(request, employer_id):
     employer = get_object_or_404(Employer, id=employer_id)

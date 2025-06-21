@@ -12,7 +12,7 @@ def plan_list(request):
     monthly_plans = Plan.objects.filter(duration='month')
     yearly_plans = Plan.objects.filter(duration='year')
 
-    user_subscription = Subscription.objects.filter(employer=request.user, active=True).first()
+    user_subscription = Subscription.objects.filter(user=request.user, active=True).first()
 
     return render(request, 'plan/plan_list.html', {
         'weekly_plans': weekly_plans,

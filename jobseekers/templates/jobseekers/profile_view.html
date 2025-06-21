@@ -238,6 +238,9 @@
             <a href="{% url 'jobs:saved_jobs_list' %}" class="btn btn-outline-secondary">
                 <i class="fas fa-bookmark me-1"></i> Saved Jobs
             </a>
+            <a href="{% url 'resumes:jobseeker_resume_list' request.user.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-edit me-1"></i> See Your Resume
+            </a>
         </div>
     </div>
 

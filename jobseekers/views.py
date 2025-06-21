@@ -179,7 +179,9 @@ def dashboard(request):
         'recommended_jobs': recommended[:6]  # Show top 6
     })
 
-
+def jobseeker_resume(request):
+    resumes = Resume.objects.all
+    return render(request, 'jobseekers/user_resume.html')
 
 @login_required
 def telegram_settings(request):

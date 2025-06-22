@@ -1,10 +1,12 @@
 
 from django.db import models
 from django.db.models.signals import post_save
+from django.contrib.auth import get_user_model
 from django.dispatch import receiver
 from django.conf import settings
 from django.utils import timezone
 
+User = get_user_model()
 
 class Plan(models.Model):
     DURATION_CHOICES = [
@@ -24,7 +26,7 @@ class Plan(models.Model):
         return f"{self.name} ({self.get_duration_display()})"
 
 class Subscription(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # আগে ছিল employer
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)

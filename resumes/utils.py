@@ -2,13 +2,22 @@ import re
 import openai
 from django.conf import settings
 
+EMAIL_REGEX = r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+PHONE_REGEX = r'(\+?\d[\d\-\s]{8,}\d)'
+
 def extract_email(text):
-    match = re.search(r'[\w\.-]+@[\w\.-]+', text)
+    match = re.search(EMAIL_REGEX, text)
     return match.group(0) if match else None
 
+
 def extract_phone(text):
-    match = re.search(r'(\+?\d{10,13})', text)
-    return match.group(0) if match else None
+    match = re.search(PHONE_REGEX, text)
+    if match:
+        # strip out non-digit except leading '+'
+        num = match.group(0)
+        return re.sub(r'[^\d+]', '', num)
+    return None
+
 
 def extract_name(text):
     lines = text.strip().split('\n')

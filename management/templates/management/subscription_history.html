@@ -36,8 +36,8 @@
                                     <span class="badge bg-secondary">Inactive</span>
                                 {% endif %}
                             </td>
-                            <td>{{ sub.user.user_type|title }}</td>  <!-- নতুন -->
-                            <td>{{ sub.ai_tokens }}</td>  <!-- নতুন -->
+                            <td>{{ sub.user.user_type|default:"N/A" }}</td>
+                            <td>{{ sub.ai_tokens }}</td>  
                         </tr>
                         {% endfor %}
                     </tbody>

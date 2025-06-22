@@ -239,7 +239,11 @@ def ai_token_usage(request):
 
 
 def subscription_history(request):
-    subscriptions = Subscription.objects.select_related('plan').filter(user=request.user).order_by('-start_date')  # আগে ছিল employer
+    if request.user.is_superuser:
+        subscriptions = Subscription.objects.select_related('plan', 'user').all().order_by('-start_date')
+    else:
+        subscriptions = Subscription.objects.select_related('plan', 'user').filter(user=request.user).order_by('-start_date')
+    
     return render(request, 'management/subscription_history.html', {
         'subscriptions': subscriptions,
     })

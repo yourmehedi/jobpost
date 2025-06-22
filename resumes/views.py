@@ -1,5 +1,5 @@
 import os
-import fitz  # PyMuPDF
+import fitz  
 import textract
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
@@ -23,10 +23,8 @@ def extract_pdf_text(path):
     doc = fitz.open(path)
     text = ""
     for page in doc:
-        text += page.get_text()
+        text += page.get_text() 
     return text
-
-
 @login_required
 def upload_resume(request):
     if request.method == 'POST' and request.FILES.get('resume'):
@@ -34,7 +32,7 @@ def upload_resume(request):
         file_ext = os.path.splitext(uploaded_file.name)[1].lower()
 
         # ✅ Validate file type
-        if file_ext not in ALLOWED_EXTENSIONS:
+        if file_ext not in ['.pdf', '.doc', '.docx']:
             messages.error(request, "Invalid file type. Please upload a PDF, DOC, or DOCX file.")
             return redirect('resumes:upload_resume')
 
@@ -43,22 +41,39 @@ def upload_resume(request):
         file_path = fs.path(filename)
 
         try:
-            # ✅ Use PyMuPDF for PDF, textract otherwise
+            # ✅ Extract text
             if file_ext == '.pdf':
                 text = extract_pdf_text(file_path)
             else:
                 text = textract.process(file_path).decode('utf-8')
 
-            cleaned_text = moderate_text(text)
+            print("🧾 Raw Extracted Text:\n", text[:1000])  # Debug
 
-            full_name = moderate_text(extract_name(cleaned_text) or "")
+            # ✅ Apply moderation (optional)
+            try:
+                cleaned_text = moderate_text(text)
+            except Exception as e:
+                print("⚠️ moderate_text failed, using raw text:", e)
+                cleaned_text = text
+
+            # ✅ Extract individual fields
+            full_name = extract_name(cleaned_text) or ""
             email = extract_email(cleaned_text)
             phone = extract_phone(cleaned_text)
-            skills = moderate_text(extract_skills(cleaned_text) or "")
-            experience = moderate_text(extract_experience(cleaned_text) or "")
-            education = moderate_text(extract_education(cleaned_text) or "")
+            skills = extract_skills(cleaned_text) or ""
+            experience = extract_experience(cleaned_text) or ""
+            education = extract_education(cleaned_text) or ""
 
-            # ✅ Generate tags (combined basic + AI)
+            # ✅ Print for debug
+            print("✅ Extracted Data:")
+            print("Full Name:", full_name)
+            print("Email:", email)
+            print("Phone:", phone)
+            print("Skills:", skills)
+            print("Experience:", experience)
+            print("Education:", education)
+
+            # ✅ Generate tags
             ai_tags = ai_generate_tags(cleaned_text[:1500])
             tags = ', '.join(set(generate_tags(skills, experience).split(',') + ai_tags.split(',')))
 
@@ -78,6 +93,7 @@ def upload_resume(request):
 
             # ✅ Auto-fill Jobseeker profile
             jobseeker, _ = Jobseeker.objects.get_or_create(user=request.user)
+
             if full_name:
                 jobseeker.full_name = full_name
             if phone:
@@ -89,17 +105,17 @@ def upload_resume(request):
                 jobseeker.address = "Auto-filled from resume"
             jobseeker.save()
 
-            messages.success(request, "Resume uploaded and processed successfully.")
+            messages.success(request, "✅ Resume uploaded and processed successfully.")
             return redirect('resumes:resume_success')
 
-        
         except Exception as e:
-            print("Resume parsing error:", e)
+            print("❌ Resume parsing error:", e)
             messages.error(request, "There was an error processing your resume.")
 
         return redirect('resumes:resume_list')
 
     return render(request, 'resumes/upload.html')
+
 
 def resume_success(request):
     return render(request, 'resumes/seccess.html')

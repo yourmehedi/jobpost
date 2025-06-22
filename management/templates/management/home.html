@@ -263,7 +263,7 @@
           Find the Perfect Job or Talent in Minutes
         </h1>
         <p class="hero-subtitle text-lg md:text-xl text-blue-100 mb-8 md:mb-10 max-w-2xl mx-auto">
-          The fastest way to connect employers with qualified candidates. No unnecessary signups for job seekers.
+          The fastest way to connect employers with qualified candidates. <br> No unnecessary signups for job seekers.
         </p>
 
         <form method="get" action="{% url 'jobs:job_list' %}" class="search-inputs flex flex-col md:flex-row gap-3 md:gap-4 justify-center max-w-2xl mx-auto">
@@ -291,7 +291,7 @@
         </form>
 
         <div class="mt-6 md:mt-8 flex flex-wrap justify-center gap-2 md:gap-4 text-sm md:text-base">
-          <span class="text-blue-100">Popular searches:</span>
+          <span class="text-blue-100">Popular Searches:</span>
           <a href="{% url 'jobs:job_list' %}?q=developer" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 md:px-3 md:py-1 rounded-full">Developer</a>
           <a href="{% url 'jobs:job_list' %}?q=designer" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 md:px-3 md:py-1 rounded-full">Designer</a>
           <a href="{% url 'jobs:job_list' %}?q=marketing" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 md:px-3 md:py-1 rounded-full">Marketing</a>

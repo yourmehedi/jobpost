@@ -380,7 +380,7 @@ def generate_job_description(request):
         if not title:
             return JsonResponse({'error': 'Title is required'}, status=400)
 
-        # ✅ Demo AI response (ভবিষ্যতে OpenAI বা LLM সংযুক্ত হবে)
+       
         description = f"""
         We are looking for a passionate {title} to join our {industry or 'forward-thinking'} team.
         As a {job_role or title}, you'll be responsible for developing innovative solutions,

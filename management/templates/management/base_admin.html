@@ -195,6 +195,9 @@
             <a href="{% url 'management:job_monitoring' %}" class="nav-link">
                 <i class="fas fa-fw fa-briefcase"></i> Job Monitoring
             </a>
+            <a href="{% url 'management:contact_message_list' %}" class="nav-link">
+                <i class="fas fa-fw fa-envelope"></i> Contact Messages
+            </a>
             <a href="{% url 'jobs:applications_dashboard' %}" class="nav-link">
                 <i class="fas fa-fw fa-file-alt"></i> Job Applications
             <a href="{% url 'management:ai_token_usage' %}" class="nav-link">
@@ -202,6 +205,31 @@
             </a>
             <a href="{% url 'management:subscription_history' %}"  class="nav-link">
                 <i class="fas fa-fw fa-history"></i> Subscription History
+            </a>
+            <a href="{% url 'subscriptions:manage_plans' %}" class="nav-link">
+                <i class="fas fa-fw fa-rotate-right"></i> Subscription Plan Update
+            </a>
+
+            <a href="{% url 'communications:broadcast_create' %}" class="nav-link">
+                <i class="fas fa-fw fa-bullhorn"></i> Send Broadcast
+            </a>
+            <a href="{% url 'management:subscription_history' %}" class="nav-link">
+                <i class="fas fa-fw fa-briefcase"></i> Employer Messaging
+            </a>
+            <a href="{% url 'management:subscription_history' %}" class="nav-link">
+                <i class="fas fa-fw fa-user-tie"></i> Jobseeker Messaging
+            </a>
+            
+            <!-- Telegram Section -->
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-heading">
+                <i class="fas fa-paper-plane me-2"></i> Telegram
+            </div>
+            <a href="https://t.me/yourchannel" target="_blank" class="nav-link">
+                <i class="fab fa-fw fa-telegram"></i> Join Our Channel
+            </a>
+            <a href="https://t.me/yourgroup" target="_blank" class="nav-link">
+                <i class="fas fa-fw fa-users"></i> Support Group
             </a>
         </div>
     </div>

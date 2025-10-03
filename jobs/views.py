@@ -2,13 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect
-from .forms import JobForm
-import random
-from .models import *
-from django.contrib import messages
-from .utils import get_employer_limits
-from accounts.models import *
-from datetime import datetime
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import JobApplication
 from django.db.models import Q
@@ -22,6 +15,13 @@ from subscriptions.models import Subscription
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.urls import reverse
+from .forms import JobForm
+from django.contrib import messages
+from .utils import get_employer_limits
+from accounts.models import *
+from datetime import datetime
+import random
+from .models import *
 
 def has_valid_ai_token(user):
     sub = Subscription.objects.filter(employer=user, active=True).first()
@@ -31,12 +31,12 @@ def has_valid_ai_token(user):
 def post_job(request):
     message = None
     companies = Company.objects.all()
+    
 
     if request.method == 'POST':
         employer = None
 
         if request.user.is_superuser:
-            # Allow superuser to post without EmployerProfile
             employer = None
         else:
             try:
@@ -45,7 +45,6 @@ def post_job(request):
                 message = "You must have an employer account to post a job."
                 return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
-        # Field extraction
         title = request.POST.get('jobTitle')
         company_name = request.POST.get('companyName')
         description = request.POST.get('jobDescription')
@@ -80,26 +79,23 @@ def post_job(request):
         country = request.POST.get('country')
         english_required = request.POST.get('english_required') == 'on'
 
-        # ✅ Validation
         required_fields = [title, company_name, description, location]
         if not all(required_fields):
             message = "Please fill in all required fields."
             return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
-        # ✅ Clean text
         clean_description = moderate_text(description)
         clean_skills = moderate_text(skills)
         clean_principal = moderate_text(principal)
         clean_title = moderate_text(title)
         clean_company_name = moderate_text(company_name)
 
-        # ✅ Save Job
         company, _ = Company.objects.get_or_create(name=clean_company_name)
 
         Job.objects.create(
             title=clean_title,
             company=company,
-            employer=employer,  # None for superuser
+            employer=employer,
             description=clean_description,
             location=location,
             formatted_address=formatted_address,
@@ -237,7 +233,7 @@ def save_job(request):
 
     job = get_object_or_404(Job, id=job_id)
 
-    # ✅ CustomUser থেকে Jobseeker instance বের করি
+    
     try:
         jobseeker = Jobseeker.objects.get(user=request.user)
     except Jobseeker.DoesNotExist:
@@ -277,7 +273,7 @@ def more_detail(request, job_id):
 
 @login_required
 def saved_jobs_list(request):
-    jobseeker = request.user.jobseeker_profile  # যেহেতু Jobseeker মডেলে OneToOneField আছে
+    jobseeker = request.user.jobseeker_profile  
     saved_jobs = SavedJob.objects.filter(jobseeker=jobseeker).select_related('job').order_by('-saved_at')
 
     return render(request, 'jobs/saved_jobs.html', {
@@ -366,28 +362,3 @@ def consume_user_token(user):
     if subscription and subscription.consume_token():
         return True
     return False
-
-@login_required
-def generate_job_description(request):
-    if request.method == 'POST':
-        if not has_valid_ai_token(request.user):
-            return JsonResponse({'error': 'No AI tokens left.'}, status=403)
-
-        title = request.POST.get('title', '')
-        job_role = request.POST.get('role', '')
-        industry = request.POST.get('industry', '')
-
-        if not title:
-            return JsonResponse({'error': 'Title is required'}, status=400)
-
-       
-        description = f"""
-        We are looking for a passionate {title} to join our {industry or 'forward-thinking'} team.
-        As a {job_role or title}, you'll be responsible for developing innovative solutions,
-        collaborating with cross-functional teams, and driving product excellence.
-        """
-
-        # Optional: Token consume করো
-        consume_user_token(request.user)
-
-        return JsonResponse({'description': description.strip()})

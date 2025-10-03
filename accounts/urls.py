@@ -15,7 +15,13 @@ urlpatterns = [
     path('profile/', views.user_profile, name='profile'),
     path('jobseekres-registretion-form/', views.jobseeker_register, name='jobseeker_register'),
     path('employer-registretion-form/', views.employer_register, name='employer_register'),
-    path('google-login/', views.google_login, name='google_login'),
+    
     path('logout/', views.logout_view, name='logout'),
     path('login/', login_view, name='login'),
+
+    path("google/login/", views.google_login, name="google_login"),
+    path("google/callback/", views.google_callback, name="google_callback"),
+
+    path("facebook/login/", views.facebook_login, name="facebook_login"),
+    path("facebook/callback/", views.facebook_callback, name="facebook_callback"),
 ]

@@ -1,0 +1,142 @@
+{% extends 'management/base_admin.html' %}  
+{% block content %}
+<style>
+  .subscription-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-family: Arial, sans-serif;
+  }
+
+  .subscription-container h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 6px;
+  }
+
+  .subscription-container form {
+    margin-bottom: 20px;
+  }
+
+  .subscription-container button {
+    transition: background 0.3s;
+  }
+
+  .subscription-container button:hover {
+    opacity: 0.9;
+  }
+
+  .subscription-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  .subscription-table th {
+    background: #f3f4f6;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .subscription-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+
+  .subscription-table tr:nth-child(even) {
+    background: #fafafa;
+  }
+
+  .btn-save {
+    background: #2563eb;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-save:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-update {
+    background: #16a34a;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-update:hover {
+    background: #15803d;
+  }
+</style>
+
+<div class="subscription-container">
+  <h2>Manage Subscription Plans</h2>
+
+  <!-- Form -->
+  
+  <!-- Existing Plans -->
+  <h3 class="text-xl font-semibold mb-2">Existing Plans</h3>
+  <table class="subscription-table">
+  <tr>
+    <th>Name</th>
+    <th>Job Limit</th>
+    <th>Resume View</th>
+    <th>AI Access</th>
+    <th>Price</th>
+    <th>Duration</th>
+    <th>Actions</th>
+  </tr>
+  {% for plan in plans %}
+  <tr>
+    <td>{{ plan.name }}</td>
+    <td>{{ plan.job_limit }}</td>
+    <td>{{ plan.resume_view_limit }}</td>
+    <td>{% if plan.has_ai_access %}✅{% else %}❌{% endif %}</td>
+    <td>${{ plan.price }}</td>
+    <td>{{ plan.get_duration_display }}</td>
+    <td>
+      <form method="POST" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="plan_id" value="{{ plan.id }}">
+        
+        <!-- ইনলাইন ভ্যালু দেখানো -->
+        <input type="text" name="name" value="{{ plan.name }}" class="border px-2 py-1 w-24">
+        <input type="number" name="job_limit" value="{{ plan.job_limit }}" class="border px-2 py-1 w-20">
+        <input type="number" name="resume_view_limit" value="{{ plan.resume_view_limit }}" class="border px-2 py-1 w-20">
+        <label>
+          <input type="checkbox" name="has_ai_access" {% if plan.has_ai_access %}checked{% endif %}>
+          AI
+        </label>
+        <input type="number" step="0.01" name="price" value="{{ plan.price }}" class="border px-2 py-1 w-20">
+        
+        <select name="duration" class="border px-2 py-1">
+          {% for value, label in plan.DURATION_CHOICES %}
+            <option value="{{ value }}" {% if plan.duration == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+        
+        <button type="submit" class="btn-update">Update</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+</div>
+{% endblock %}

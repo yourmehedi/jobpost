@@ -6,6 +6,13 @@ app_name = 'management'
 
 urlpatterns = [
     path('', views.home, name='home'), 
+    path('about-us/', views.about_us, name='about_us'),
+    path('contact-us/', views.contact_us, name='contact_us'),
+    path("contact-messages/", views.contact_message_list, name="contact_message_list"),
+    path("contact-messages/delete/<int:pk>/", views.delete_contact_message, name="delete_contact_message"),
+    path("contact-messages/reply/<int:pk>/", views.reply_contact_message, name="reply_contact_message"),
+
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('employer/register/', views.employer_register, name='employer_register'),
     path('employer/register/success/', views.registration_success, name='registration_success'), 
     path('jobportal-admin_dashboard/', views.dashboard_home, name='dashboard'),
@@ -22,4 +29,5 @@ urlpatterns = [
     path('delete-job/<int:job_id>/', views.delete_job, name='delete_job'),
     path('ai-token-usage/', views.ai_token_usage, name='ai_token_usage'),
     path('subscription-history/', views.subscription_history, name='subscription_history'),
+    path('subscription/delete/<int:subscription_id>/', views.delete_subscription, name='delete_subscription'),
 ]

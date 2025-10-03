@@ -24,7 +24,7 @@ class Employer(models.Model):
     company_website = models.URLField(blank=True, null=True)
     employer_type = models.CharField(max_length=20, choices=EMPLOYER_TYPE_CHOICES)
     approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='pending')
-    license_file = models.FileField(upload_to='licenses/', blank=True, null=True)  # <-- এই লাইনটি নতুন
+    license_file = models.FileField(upload_to='licenses/', blank=True, null=True)  
     address = models.TextField(blank=True, null=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -35,8 +35,19 @@ class Employer(models.Model):
         return f"{self.company_name} ({self.get_employer_type_display()})"
 
 
+class ContactMessage(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    message = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message from {self.name} ({self.user.user_type if self.user else 'Guest'})"
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)  
 def create_employer_profile(sender, instance, created, **kwargs):
     if created and not instance.is_superuser:
         pass 
+
+

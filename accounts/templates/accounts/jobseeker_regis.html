@@ -115,6 +115,14 @@
 </head>
 <body>
   <div class="register-container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
     <h2>Create Job Seeker Account</h2>
     <form method="POST" enctype="multipart/form-data">
       <!-- User Info -->

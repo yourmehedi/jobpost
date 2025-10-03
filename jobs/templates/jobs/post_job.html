@@ -137,7 +137,8 @@
         <button type="button" id="generateAI" class="btn btn-outline-secondary btn-sm mt-2">✨ Generate with AI</button>
     {% endif %}
   </div>
-
+ 
+ 
 
   <div class="mb-3">
     <label for="skills" class="form-label">Skills</label>
@@ -251,6 +252,7 @@
   {% endif %}
 </form>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const generateBtn = document.getElementById('generateAI');
@@ -259,37 +261,39 @@ document.addEventListener('DOMContentLoaded', function () {
     const industryInput = document.getElementById('industry');
     const descBox = document.getElementById('jobDescription');
 
-    generateBtn.addEventListener('click', function () {
-        const title = titleInput.value.trim();
-        const role = roleInput.value.trim();
-        const industry = industryInput.value.trim();
+    if(generateBtn){
+        generateBtn.addEventListener('click', function () {
+            const title = titleInput.value.trim();
+            const role = roleInput.value.trim();
+            const industry = industryInput.value.trim();
 
-        if (!title) {
-            alert("Please enter a job title before generating.");
-            return;
-        }
-
-        fetch("/ai/generate-job-description/", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: `title=${encodeURIComponent(title)}&role=${encodeURIComponent(role)}&industry=${encodeURIComponent(industry)}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                descBox.value = data.description;
+            if (!title) {
+                alert("Please enter a job title before generating.");
+                return;
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("Something went wrong while generating the description.");
+
+            fetch("/ai/generate-job-description/", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: `title=${encodeURIComponent(title)}&role=${encodeURIComponent(role)}&industry=${encodeURIComponent(industry)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    descBox.value = data.description;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Something went wrong while generating the description.");
+            });
         });
-    });
+    }
 });
 </script>
 

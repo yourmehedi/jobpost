@@ -1,4 +1,3 @@
-# ai_engine/views.py
 import openai
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -6,13 +5,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from subscriptions.models import Subscription
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 
 @login_required
 def resume_parser(request):
-    if not request.user.has_ai_access:
+    # Check AI access based on subscription tokens
+    if not Subscription.objects.filter(employer=request.user, active=True, ai_tokens__gt=0).exists():
         messages.error(request, "This is a premium feature. Please upgrade your plan.")
         return redirect('subscriptions:plan_list')
 
@@ -44,22 +43,24 @@ def resume_parser(request):
         'parsed_data': parsed_data
     })
 
+
 def consume_user_token(user):
     subscription = Subscription.objects.filter(employer=user, active=True).first()
     if subscription and subscription.consume_token():
         return True
     return False
 
-@csrf_exempt
+
 @login_required
 @require_POST
 def generate_job_description(request):
-    if not request.user.has_ai_access:
+    # ✅ Fix field name (use user instead of employer)
+    if not Subscription.objects.filter(user=request.user, active=True, ai_tokens__gt=0).exists():
         return JsonResponse({'error': 'AI access is not available for your plan.'}, status=403)
 
-    title = request.POST.get('title', '')
-    role = request.POST.get('role', '')
-    industry = request.POST.get('industry', '')
+    title = request.POST.get('title', '').strip()
+    role = request.POST.get('role', '').strip()
+    industry = request.POST.get('industry', '').strip()
 
     if not title:
         return JsonResponse({'error': 'Job title is required.'}, status=400)
@@ -68,7 +69,7 @@ def generate_job_description(request):
         openai.api_key = settings.OPENAI_API_KEY
         prompt = (
             f"Write a professional and detailed job description for a position titled '{title}' "
-            f"in the '{industry}' industry. The role of the candidate will be '{role}'."
+            f"in the '{industry or 'general'}' industry. The role of the candidate will be '{role or title}'."
         )
 
         response = openai.ChatCompletion.create(
@@ -81,10 +82,15 @@ def generate_job_description(request):
 
         description = response['choices'][0]['message']['content'].strip()
 
-        if not consume_user_token(request.user):
-            return JsonResponse({'error': 'Token limit reached.'}, status=403)
+        # ✅ Deduct token (also use user instead of employer)
+        subscription = Subscription.objects.filter(user=request.user, active=True).first()
+        if subscription:
+            subscription.consume_token()
 
         return JsonResponse({'description': description})
 
+    
+    except openai.error.RateLimitError:
+        return JsonResponse({'error': 'OpenAI quota exceeded. Please check your API plan or key.'}, status=429)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from core_ui.utils import is_feature_enabled
 
 def send_telegram_message(chat_id, message):
     token = settings.TELEGRAM_BOT_TOKEN

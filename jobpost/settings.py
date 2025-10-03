@@ -15,9 +15,6 @@ from pathlib import Path
 from django.core.files.base import ContentFile
 from decouple import config
 
-GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID')
-GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET')
-GOOGLE_REDIRECT_URI = config('GOOGLE_REDIRECT_URI')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-OPENAI_API_KEY = config("OPENAI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -49,19 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'rest_framework',
 
     'social_django',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.facebook',
-
     'crispy_forms',
     'crispy_bootstrap5',
 
-
     'accounts',
+    'communications',
     'management',
     'employers',
     'jobseekers',
@@ -83,22 +75,43 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',  
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',  
     'django.contrib.auth.backends.ModelBackend',
 )
 
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+# Google
+GOOGLE_CLIENT_ID = "383195615954-1m29kh0m981s7ejqhpf3dginnen8gtl4.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "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"
 
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_CLIENT_SECRET
+
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = "http://127.0.0.1:8000/google/callback/"
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/login-error/'
+SOCIAL_AUTH_LOGIN_URL = '/login/'
+
+GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/accounts/google/callback/"
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+LOGOUT_REDIRECT_URL = '/'
 
 # Optional - To suppress email confirmation
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+
+# Facebook
+FACEBOOK_CLIENT_ID = "1954401585354870"
+FACEBOOK_CLIENT_SECRET = "fdb5b71cbf42edfe90ca4463ebbae7d6"
+FACEBOOK_REDIRECT_URI = "http://127.0.0.1:8000/accounts/facebook/callback/"
+
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'id, name, email, picture.type(large)'
+}
 
 
 
@@ -110,7 +123,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
@@ -132,6 +144,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'management.context_processors.current_year',
                 'core_ui.context_processors.current_year',
+                'communications.context_processors.unread_notifications',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
             
         },
@@ -177,11 +192,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+USE_TZ = True
+TIME_ZONE = 'Asia/Dhaka'
 
 USE_I18N = True
-
-USE_TZ = True
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
@@ -196,7 +210,7 @@ DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
 
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

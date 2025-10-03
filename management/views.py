@@ -5,13 +5,15 @@ from .forms import EmployerRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model, authenticate, login
+from communications.models import Notification, Message
 from employers.models import EmployerProfile
 from subscriptions.models import *
 from management.models import Employer
 from accounts.forms import UserEditForm
-from jobs.models import Job
+from jobs.models import Job, JobApplication
 from .models import *
 from django.contrib import messages
+from django.contrib import messages as dj_messages
 from django.contrib.auth.decorators import user_passes_test
 User = get_user_model()
 
@@ -22,6 +24,79 @@ def is_superadmin(user):
 def home(request):
     print(request.user)
     return render(request, 'management/home.html')
+
+@login_required
+def reply_contact_message(request, pk):
+    contact_msg = get_object_or_404(ContactMessage, pk=pk)
+
+    if request.method == "POST":
+        reply_text = request.POST.get("reply")
+        now = timezone.now()
+
+        # Send message to user's inbox
+        if contact_msg.user: 
+            Message.objects.create(
+                sender=request.user,
+                recipient=contact_msg.user,
+                subject="Reply to your contact message",
+                body=reply_text,
+                sent_at=now
+            )
+
+            # Send notification
+            Notification.objects.create(
+                user=contact_msg.user,
+                title="Reply to your contact message",
+                message=reply_text[:250] + "..." if len(reply_text) > 250 else reply_text,
+                link="/messages/inbox/",
+                created_at=now,
+                target_role="all"
+            )
+
+        dj_messages.success(request, "Reply sent successfully.")
+        return redirect("management:contact_message_list")
+
+    return render(request, "management/reply_contact_message.html", {"contact_msg": contact_msg})
+
+@login_required
+@user_passes_test(is_superadmin)
+def contact_message_list(request):
+    messages_list = ContactMessage.objects.select_related("user").order_by("-sent_at")
+    return render(request, "management/contact_message_list.html", {"messages_list": messages_list})
+
+
+@login_required
+@user_passes_test(is_superadmin)
+def delete_contact_message(request, pk):
+    msg = get_object_or_404(ContactMessage, pk=pk)
+    msg.delete()
+    dj_messages.success(request, "Message deleted successfully.")
+    return redirect("management:contact_message_list")
+
+@login_required
+def contact_us(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        message_text = request.POST.get("message")
+
+        ContactMessage.objects.create(
+            user=request.user, 
+            name=name,
+            email=email,
+            message=message_text
+        )
+
+        messages.success(request, "Your message has been sent successfully!")
+        return redirect("management:contact_us")
+
+    return render(request, 'management/contact_us.html')   
+
+def privacy_policy(request):
+    return render(request, 'management/privacy_policy.html')
+
+def about_us(request):
+    return render(request, 'management/about_us.html')
 
 def employer_register(request):
     if request.method == 'POST':
@@ -59,8 +134,18 @@ def registration_success(request):
 
 @user_passes_test(lambda u: u.is_superuser, login_url='management:superuser_login')
 def dashboard_home(request):
-    return render(request, 'management/dashboard_home.html')
+    total_users = CustomUser.objects.count()
+    employers = CustomUser.objects.filter(user_type="employer").count()
+    jobseekers = CustomUser.objects.filter(user_type="jobseeker").count()
+    applications = JobApplication.objects.count()
 
+    context = {
+        "total_users": total_users,
+        "employers": employers,
+        "jobseekers": jobseekers,
+        "applications": applications,
+    }
+    return render(request, "management/dashboard_home.html", context)
 
 def superuser_login_view(request):
     if request.method == 'POST':
@@ -247,3 +332,13 @@ def subscription_history(request):
     return render(request, 'management/subscription_history.html', {
         'subscriptions': subscriptions,
     })
+
+def delete_subscription(request, subscription_id):
+    if not request.user.is_superuser:
+        messages.error(request, "You don't have permission to delete subscriptions.")
+        return redirect('management:subscription_history')
+
+    subscription = get_object_or_404(Subscription, id=subscription_id)
+    subscription.delete()
+    messages.success(request, "Subscription deleted successfully.")
+    return redirect('management:subscription_history')

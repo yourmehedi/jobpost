@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 
 
-
+admin.site.register(ContactMessage)
 @admin.register(Employer)
 class EmployerAdmin(admin.ModelAdmin):
     list_display = ('company_name', 'user', 'employer_type', 'approval_status', 'is_active', 'created_on')

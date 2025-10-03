@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Inbox</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+        .inbox-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        h2 {
+            color: #343a40;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .message-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            border-left: 4px solid #0d6efd;
+        }
+        .message-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .message-subject {
+            font-weight: 600;
+            color: #212529;
+            font-size: 1.1rem;
+        }
+        .message-sender {
+            color: #6c757d;
+        }
+        .message-time {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .message-body {
+            color: #495057;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        .empty-inbox {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        .empty-inbox i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="inbox-container">
+        <h2><i class="fas fa-inbox me-2"></i>Inbox</h2>
+        
+        {% if messages %}
+        <div class="list-group">
+            {% for msg in messages %}
+            <div class="message-item">
+                <div class="message-header">
+                    <span class="message-subject">{{ msg.subject }}</span>
+                    <span class="message-time">{{ msg.sent_at|date:"d M Y H:i" }}</span>
+                </div>
+                <div class="message-sender">From: {{ msg.sender.username }}</div>
+                <div class="message-body">{{ msg.body|linebreaks }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-inbox">
+            <i class="fas fa-envelope-open-text"></i>
+            <div>No messages yet.</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>

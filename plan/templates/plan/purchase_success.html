@@ -98,22 +98,32 @@
 
         <!-- Next steps -->
         <div class="text-center">
-          <p class="text-gray-600 mb-6">What would you like to do next?</p>
-          <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <p class="text-gray-600 mb-6">What would you like to do next?</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          
+          {% if user.user_type == "employer" %}
             <a href="{% url 'employers:dashboard' %}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
-              <i class="fas fa-tachometer-alt mr-2"></i> Go to Dashboard
+              <i class="fas fa-tachometer-alt mr-2"></i> Go to Employer Dashboard
             </a>
-            <a href="#" class="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors">
-              <i class="fas fa-question-circle mr-2"></i> Get Help
+          
+          {% elif user.user_type == "jobseeker" %}
+            <a href="{% url 'jobseeker:dashboard' %}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
+              <i class="fas fa-tachometer-alt mr-2"></i> Go to Jobseeker Dashboard
             </a>
-          </div>
+          {% endif %}
+
+          <a href="#" class="px-6 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors">
+            <i class="fas fa-question-circle mr-2"></i> Get Help
+          </a>
         </div>
+    </div>
+
       </div>
 
       <!-- Footer note -->
       <div class="bg-gray-50 px-8 py-4 text-center border-t border-gray-200">
         <p class="text-sm text-gray-500">
-          Need to make changes? Visit your <a href="#" class="text-blue-600 hover:underline">account settings</a> anytime.
+          Need to make changes? Visit your <a href="{% url 'jobseeker:account_settings' %}" class="text-blue-600 hover:underline">account settings</a> anytime.
         </p>
       </div>
     </div>

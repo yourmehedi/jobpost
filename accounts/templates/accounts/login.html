@@ -431,11 +431,13 @@
           <div class="divider">
             <span class="divider-text">Or sign in with</span>
           </div>
-          <a href="#" class="social-btn google-btn">
-            <i class="fab fa-google"></i> Sign in with Google
+          <a href="{% url 'accounts:google_login' %}" class="social-btn google-btn">
+              <i class="fab fa-google"></i> Sign in with Google
           </a>
 
-          <a href="#" class="social-btn facebook-btn">
+
+
+          <a href="{% url 'accounts:facebook_login' %}" class="social-btn facebook-btn">
             <i class="fab fa-facebook-f"></i> Sign in with Facebook
           </a>
         </div>

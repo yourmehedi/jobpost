@@ -7,7 +7,7 @@ User = get_user_model()
 class Jobseeker(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='jobseeker_profile')
     full_name = models.CharField(max_length=150)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=20, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
     contact_number = models.CharField(max_length=20)
     address = models.TextField()

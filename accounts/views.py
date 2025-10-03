@@ -1,71 +1,74 @@
-
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
-import requests
-from .models import CustomUser
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, login
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
+from rest_framework.response import Response
+from django.http import HttpResponse
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from urllib.parse import urlencode
+from django.conf import settings
 from jobseekers.models import *
+from .models import CustomUser
 from employers.models import *
+User = get_user_model()
 from .forms import *
+import requests
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def google_login(request):
-    code = request.data.get('code')
-    if not code:
-        return Response({'error': 'Code is required'}, status=400)
+# @api_view(['POST'])
+# @permission_classes([AllowAny])
+# def google_login(request):
+#     code = request.data.get('code')
+#     if not code:
+#         return Response({'error': 'Code is required'}, status=400)
 
-    data = {
-        'code': code,
-        'client_id': settings.GOOGLE_CLIENT_ID,
-        'client_secret': settings.GOOGLE_CLIENT_SECRET,
-        'redirect_uri': settings.GOOGLE_REDIRECT_URI,
-        'grant_type': 'authorization_code',
-    }
+#     data = {
+#         'code': code,
+#         'client_id': settings.GOOGLE_CLIENT_ID,
+#         'client_secret': settings.GOOGLE_CLIENT_SECRET,
+#         'redirect_uri': settings.GOOGLE_REDIRECT_URI,
+#         'grant_type': 'authorization_code',
+#     }
 
-    token_response = requests.post('https://oauth2.googleapis.com/token', data=data)
-    token_json = token_response.json()
-    access_token = token_json.get('access_token')
-    id_token = token_json.get('id_token')
+#     token_response = requests.post('https://oauth2.googleapis.com/token', data=data)
+#     token_json = token_response.json()
+#     access_token = token_json.get('access_token')
+#     id_token = token_json.get('id_token')
 
-    if not id_token:
-        return Response({'error': 'ID token not provided'}, status=400)
+#     if not id_token:
+#         return Response({'error': 'ID token not provided'}, status=400)
 
-    user_info_response = requests.get(
-        'https://www.googleapis.com/oauth2/v3/userinfo',
-        headers={'Authorization': f'Bearer {access_token}'}
-    )
-    user_info = user_info_response.json()
+#     user_info_response = requests.get(
+#         'https://www.googleapis.com/oauth2/v3/userinfo',
+#         headers={'Authorization': f'Bearer {access_token}'}
+#     )
+#     user_info = user_info_response.json()
 
-    email = user_info.get('email')
-    name = user_info.get('name')
-    picture = user_info.get('picture')
+#     email = user_info.get('email')
+#     name = user_info.get('name')
+#     picture = user_info.get('picture')
 
-    if not email:
-        return Response({'error': 'Email not available'}, status=400)
+#     if not email:
+#         return Response({'error': 'Email not available'}, status=400)
 
-    user, created = CustomUser.objects.get_or_create(email=email, defaults={
-        'name': name,
-        'is_verified': True,
-        'auth_provider': 'google',
-    })
+#     user, created = CustomUser.objects.get_or_create(email=email, defaults={
+#         'name': name,
+#         'is_verified': True,
+#         'auth_provider': 'google',
+#     })
 
-    if created and picture:
-        download_image(picture, user)
+#     if created and picture:
+#         download_image(picture, user)
 
-    refresh = get_tokens_for_user(user)
+#     refresh = get_tokens_for_user(user)
 
-    return Response({
-        'refresh': str(refresh['refresh']),
-        'access': str(refresh['access']),
-    })
+#     return Response({
+#         'refresh': str(refresh['refresh']),
+#         'access': str(refresh['access']),
+#     })
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -87,7 +90,7 @@ def user_profile(request):
     user = request.user
     if user.is_authenticated:
         return Response({
-            'name': user.name,
+            'name': user.username,
             'email': user.email,
             'profile_image': user.image.url if user.image else None,
         })
@@ -226,3 +229,167 @@ def login_view(request):
 
 def logout_view(request):
     return render(request, 'accounts/logout.html')
+
+
+def google_login(request):
+    """Step 1: Redirect user to Google's OAuth 2.0 server"""
+    google_auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth"
+        "?response_type=code"
+        f"&client_id={settings.GOOGLE_CLIENT_ID}"
+        f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
+        "&scope=openid%20email%20profile"
+    )
+    return redirect(google_auth_url)
+
+
+def google_callback(request):
+    code = request.GET.get("code")
+    if not code:
+        return HttpResponse("No code provided", status=400)
+
+    # Exchange code for tokens
+    token_url = "https://oauth2.googleapis.com/token"
+    data = {
+        "code": code,
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "grant_type": "authorization_code",
+    }
+    r = requests.post(token_url, data=data)
+    token_data = r.json()
+    access_token = token_data.get("access_token")
+
+    if not access_token:
+        return HttpResponse("Failed to obtain access token", status=400)
+
+    # Get user info
+    user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    params = {"access_token": access_token}
+    user_info = requests.get(user_info_url, params=params).json()
+
+    email = user_info.get("email")
+    name = user_info.get("name", email)
+
+    if not email:
+        return HttpResponse("Failed to fetch user info", status=400)
+
+    # Create or get user
+    user, created = User.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": email,  # CustomUser এ username required হলে
+            "first_name": name.split(" ")[0] if name else "",
+            "last_name": " ".join(name.split(" ")[1:]) if name and len(name.split(" ")) > 1 else "",
+            "user_type": "jobseeker",  # Default type
+        },
+    )
+
+    # Login user
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+    # Create or update Jobseeker profile
+    jobseeker, _ = Jobseeker.objects.get_or_create(user=user)
+    jobseeker.full_name = name
+    jobseeker.email = email
+
+    # Default fallback values
+    if not jobseeker.gender:
+        jobseeker.gender = "other"
+    if not jobseeker.contact_number:
+        jobseeker.contact_number = "N/A"
+
+    jobseeker.save()
+
+    return redirect("/")
+
+# Facebook login system section
+
+def facebook_login(request):
+    params = {
+        "client_id": settings.FACEBOOK_CLIENT_ID,
+        "redirect_uri": settings.FACEBOOK_REDIRECT_URI,
+        "scope": "email,public_profile",
+        "response_type": "code",
+        "auth_type": "rerequest",  # re-request permissions if needed
+    }
+    url = "https://www.facebook.com/v16.0/dialog/oauth?" + urlencode(params)
+    return redirect(url)
+
+
+def fetch_facebook_access_token(code):
+    token_url = "https://graph.facebook.com/v16.0/oauth/access_token"
+    params = {
+        "client_id": settings.FACEBOOK_CLIENT_ID,
+        "redirect_uri": settings.FACEBOOK_REDIRECT_URI,
+        "client_secret": settings.FACEBOOK_CLIENT_SECRET,
+        "code": code,
+    }
+    resp = requests.get(token_url, params=params)
+    return resp.json()
+
+
+def facebook_callback(request):
+    code = request.GET.get("code")
+    if not code:
+        return HttpResponse("No code provided", status=400)
+
+    token_data = fetch_facebook_access_token(code)
+    access_token = token_data.get("access_token")
+    if not access_token:
+        return HttpResponse("Failed to obtain Facebook access token: " + str(token_data), status=400)
+
+    # Fetch user info from Graph API
+    # fields can include: id,name,email,picture{url}
+    user_info_url = "https://graph.facebook.com/me"
+    params = {"fields": "id,name,email,picture.width(400).height(400)", "access_token": access_token}
+    user_info_resp = requests.get(user_info_url, params=params)
+    user_info = user_info_resp.json()
+
+    email = user_info.get("email")
+    name = user_info.get("name", "")
+    picture_url = None
+    try:
+        picture_url = user_info.get("picture", {}).get("data", {}).get("url")
+    except Exception:
+        picture_url = None
+
+    # Facebook sometimes does not provide email (user may have none or blocked). Handle gracefully.
+    if not email:
+        # Option A: ask user to provide email (redirect to a page)
+        # For now, return an error message
+        return HttpResponse("Facebook account did not provide an email. Please sign up with email.", status=400)
+
+    user, created = User.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": email,
+            "first_name": name.split(" ")[0] if name else "",
+            "last_name": " ".join(name.split(" ")[1:]) if name and len(name.split(" ")) > 1 else "",
+            "user_type": "jobseeker",
+        },
+    )
+
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+    # Update/create Jobseeker profile (same logic as Google)
+    jobseeker, _ = Jobseeker.objects.get_or_create(user=user)
+    if name:
+        jobseeker.full_name = name
+    jobseeker.email = email
+    if picture_url:
+        try:
+            pic_resp = requests.get(picture_url)
+            if pic_resp.status_code == 200:
+                jobseeker.document_upload.save(f"{user.username}_fb.jpg", ContentFile(pic_resp.content), save=False)
+        except Exception:
+            pass
+
+    if not jobseeker.gender:
+        jobseeker.gender = "other"
+    if not jobseeker.contact_number:
+        jobseeker.contact_number = ""
+    jobseeker.save()
+
+    return redirect("/")

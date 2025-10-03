@@ -114,7 +114,7 @@
         </a>
         
         <!-- Desktop Nav -->
-        <nav class="hidden md:flex items-center space-x-8">
+        <nav class="hidden md:flex items-center space-x-6">
           <a href="{% url 'jobs:job_list' %}" class="hover:text-blue-200 transition flex items-center">
             <i class="fas fa-search mr-2"></i> Find Jobs
           </a>
@@ -136,6 +136,63 @@
             <a href="{% url 'resumes:resume_list' %}" class="hover:text-blue-200 transition flex items-center">
               <i class="fas fa-users mr-2"></i> Find Talent
             </a>
+          {% endif %}
+
+          <!-- Notification Bell -->
+          {% if user.is_authenticated %}
+          <div class="relative" x-data="{ open: false }">
+            <button @click="open = !open" class="p-1 rounded-full hover:bg-blue-700 focus:outline-none relative">
+                <i class="fas fa-bell text-lg"></i>
+                {% if notifications_dropdown|length > 0 %}
+                <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                {% endif %}
+            </button>
+
+            <!-- Notification Dropdown -->
+            <div class="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
+                x-show="open"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @click.away="open = false">
+                
+                <div class="px-4 py-2 border-b border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-800">Notifications</h3>
+                </div>
+
+                <div class="max-h-60 overflow-y-auto">
+                    {% if notifications_dropdown %}
+                        {% for note in notifications_dropdown %}
+                        <a href="{{ note.link|default:'#' }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 pt-1">
+                                    <i class="fas fa-bell text-blue-500"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="font-medium">{{ note.title }}</p>
+                                    <p class="text-xs text-gray-500">
+                                        {{ note.created_at|date:"Y-m-d H:i" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <p class="px-4 py-2 text-sm text-gray-500">No notifications</p>
+                    {% endif %}
+                </div>
+
+                <div class="px-4 py-2 border-t border-gray-200">
+                    <a href="{% url 'communications:notification_list' %}" class="text-xs font-medium text-blue-600 hover:text-blue-800">
+                        View all notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+
           {% endif %}
 
           <!-- Profile Dropdown -->
@@ -204,6 +261,14 @@
 
       <!-- Mobile Menu -->
       <div id="mobileMenu" class="mobile-menu md:hidden px-4 pb-4 space-y-2">
+        <!-- Add notification to mobile menu if needed -->
+        {% if user.is_authenticated %}
+        <div class="block hover:text-blue-200 flex items-center justify-between">
+          <span><i class="fas fa-bell mr-2"></i> Notifications</span>
+          <span class="h-2 w-2 rounded-full bg-red-500"></span>
+        </div>
+        {% endif %}
+        
         <a href="{% url 'jobs:job_list' %}" class="block hover:text-blue-200 flex items-center">
           <i class="fas fa-search mr-2"></i> Find Jobs
         </a>
@@ -430,9 +495,9 @@
           <div>
             <h4 class="font-semibold text-base md:text-lg mb-3 md:mb-4">Company</h4>
             <ul class="space-y-1 md:space-y-2">
-              <li><a href="#" class="text-gray-400 hover:text-white text-sm md:text-base">About Us</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white text-sm md:text-base">Contact</a></li>
-              <li><a href="#" class="text-gray-400 hover:text-white text-sm md:text-base">Privacy Policy</a></li>
+              <li><a href="{% url 'management:about_us' %}" class="text-gray-400 hover:text-white text-sm md:text-base">About Us</a></li>
+              <li><a href="{% url 'management:contact_us' %}" class="text-gray-400 hover:text-white text-sm md:text-base">Contact</a></li>
+              <li><a href="{% url 'management:privacy_policy' %}" class="text-gray-400 hover:text-white text-sm md:text-base">Privacy Policy</a></li>
             </ul>
           </div>
         </div>

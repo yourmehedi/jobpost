@@ -34,6 +34,7 @@ class CustomUser(AbstractUser):
     is_approved = models.BooleanField(default=False)
     telegram_chat_id = models.CharField(max_length=100, blank=True, null=True)
     telegram_enabled = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
 
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'

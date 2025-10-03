@@ -103,7 +103,7 @@ def saved_jobs(request):
 
 @login_required
 def account_settings(request):
-    jobseeker = request.user.jobseeker_profile
+    jobseeker, created = Jobseeker.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
         if 'update_profile' in request.POST:

@@ -15,7 +15,7 @@ from jobseekers.models import *
 from .models import CustomUser
 from employers.models import *
 User = get_user_model()
-from .forms import *
+from .forms import *   
 import requests
 
 # @api_view(['POST'])
@@ -24,7 +24,7 @@ import requests
 #     code = request.data.get('code')
 #     if not code:
 #         return Response({'error': 'Code is required'}, status=400)
-
+ # djkefnlwkefew
 #     data = {
 #         'code': code,
 #         'client_id': settings.GOOGLE_CLIENT_ID,

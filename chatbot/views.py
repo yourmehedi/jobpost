@@ -1,55 +1,61 @@
 # chatbot/views.py
-
-import openai
-from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.utils.decorators import method_decorator
+from transformers import pipeline
 from subscriptions.models import Subscription
 
+# ✅ Helper to check if user has AI access
 def has_valid_ai_token(user):
     sub = Subscription.objects.filter(employer=user, active=True).first()
     return sub and sub.ai_tokens > 0
+
+
+# ✅ Load Hugging Face model globally once
+try:
+    chatbot_model = pipeline("text-generation", model="microsoft/DialoGPT-medium")
+except Exception as e:
+    print("⚠️ Failed to load chatbot model:", e)
+    chatbot_model = None
+
 
 @csrf_exempt
 @login_required
 @require_POST
 def chatbot_reply(request):
+    """
+    Hugging Face Chatbot (Offline fallback to OpenAI-like behavior)
+    """
     if not has_valid_ai_token(request.user):
         return JsonResponse({'error': 'No AI tokens left.'}, status=403)
 
     user_question = request.POST.get('question', '').strip()
-
     if not user_question:
         return JsonResponse({'error': 'No question received.'}, status=400)
 
     try:
-        openai.api_key = settings.OPENAI_API_KEY
+        if not chatbot_model:
+            return JsonResponse({'error': 'Chatbot model not available.'}, status=500)
 
-        system_prompt = (
-            "You are a friendly and knowledgeable assistant for a job recruitment platform. "
-            "Always try to directly and clearly answer user questions about how to use the site. "
-            "You can help them with job posting, job applications, subscription plans, editing their profile, managing their dashboard, and more. "
-            "Only suggest contacting support if the question is unrelated or there's a technical issue that cannot be resolved by advice. "
-            "Be clear, detailed, and conversational in your replies."
+        # ✅ Prepend site context (like OpenAI prompt)
+        context = (
+            "You are a helpful assistant for a job recruitment platform. "
+            "Assist users with posting jobs, applying, using AI resume tools, or managing subscriptions. "
+            "Answer in a friendly and human-like tone.\n\nUser: "
         )
+        input_text = context + user_question
 
+        response = chatbot_model(input_text, max_length=150, num_return_sequences=1)
+        answer = response[0]['generated_text'].replace(input_text, '').strip()
 
-        if len(user_question.split()) < 4:
-            user_question += " (If this is unclear, please ask the user to clarify.)"
+        # Optional — Deduct AI token usage
+        sub = Subscription.objects.filter(employer=request.user, active=True).first()
+        if sub:
+            sub.consume_token()
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_question}
-            ]
-        )
-
-        answer = response['choices'][0]['message']['content'].strip()
         return JsonResponse({'answer': answer})
 
     except Exception as e:
+        print("Chatbot Error:", e)
         return JsonResponse({'error': str(e)}, status=500)

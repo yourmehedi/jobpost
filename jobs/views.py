@@ -22,23 +22,63 @@ from accounts.models import *
 from datetime import datetime
 import random
 from .models import *
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
+import torch
+
+job_desc_tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
+job_desc_model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
+
+semantic_similarity = pipeline("feature-extraction", model="sentence-transformers/all-MiniLM-L6-v2")
+
+def consume_user_token(user):
+    subscription = Subscription.objects.filter(employer=user, active=True).first()
+    if subscription and subscription.consume_token():
+        return True
+    return False
 
 def has_valid_ai_token(user):
     sub = Subscription.objects.filter(employer=user, active=True).first()
     return sub and sub.ai_tokens > 0
 
 @login_required
+@require_POST
+def generate_job_description(request):
+    if not has_valid_ai_token(request.user):
+        return JsonResponse({'error': 'No AI tokens available for your plan.'}, status=403)
+
+    title = request.POST.get('title', '').strip()
+    role = request.POST.get('role', '').strip()
+    industry = request.POST.get('industry', '').strip()
+
+    if not title:
+        return JsonResponse({'error': 'Job title is required.'}, status=400)
+
+    prompt = (
+        f"Write a detailed, professional job description for a position titled '{title}'. "
+        f"The role involves '{role or title}'. Industry: {industry or 'general'}."
+    )
+
+    try:
+        inputs = job_desc_tokenizer(prompt, return_tensors="pt", truncation=True)
+        outputs = job_desc_model.generate(**inputs, max_length=300)
+        description = job_desc_tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+        consume_user_token(request.user)
+        return JsonResponse({'description': description})
+
+    except torch.cuda.OutOfMemoryError:
+        return JsonResponse({'error': 'Server memory full. Try later.'}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
 def post_job(request):
     message = None
     companies = Company.objects.all()
-    
 
     if request.method == 'POST':
         employer = None
-
-        if request.user.is_superuser:
-            employer = None
-        else:
+        if not request.user.is_superuser:
             try:
                 employer = request.user.employer_profile
             except EmployerProfile.DoesNotExist:
@@ -51,44 +91,22 @@ def post_job(request):
         location = request.POST.get('l')
         formatted_address = request.POST.get('formattedAddress')
         salary = request.POST.get('salary')
-        is_email_protected = request.POST.get('anonymizeEmail') == 'on'
         skills = request.POST.get('skills')
         tech_stack = ', '.join(request.POST.getlist('stack'))
-
-        try:
-            vacancies = int(request.POST.get('vacancies'))
-        except (TypeError, ValueError):
-            vacancies = 1
-
+        vacancies = int(request.POST.get('vacancies') or 1)
         expiry_date_str = request.POST.get('expiry')
-        try:
-            expiry_date = datetime.strptime(expiry_date_str, "%Y-%m-%d").date() if expiry_date_str else None
-        except ValueError:
-            expiry_date = None
+        expiry_date = datetime.strptime(expiry_date_str, "%Y-%m-%d").date() if expiry_date_str else None
 
-        valid_passport = request.POST.get('valid_passport') == 'on'
-        principal = request.POST.get('principal')
-        job_role = request.POST.get('job_role')
-        experience_level = request.POST.get('experience')
         job_type = request.POST.get('job_type')
         industry = request.POST.get('industry')
-        street = request.POST.get('street')
         city = request.POST.get('city')
-        province = request.POST.get('province')
-        zip_code = request.POST.get('zip')
         country = request.POST.get('country')
-        english_required = request.POST.get('english_required') == 'on'
 
-        required_fields = [title, company_name, description, location]
-        if not all(required_fields):
-            message = "Please fill in all required fields."
-            return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
-
-        clean_description = moderate_text(description)
-        clean_skills = moderate_text(skills)
-        clean_principal = moderate_text(principal)
+        # Moderation
         clean_title = moderate_text(title)
         clean_company_name = moderate_text(company_name)
+        clean_description = moderate_text(description)
+        clean_skills = moderate_text(skills)
 
         company, _ = Company.objects.get_or_create(name=clean_company_name)
 
@@ -100,23 +118,14 @@ def post_job(request):
             location=location,
             formatted_address=formatted_address,
             salary=salary,
-            is_email_protected=is_email_protected,
             skills=clean_skills,
             tech_stack=tech_stack,
             vacancies=vacancies,
             expiry_date=expiry_date,
-            valid_passport=valid_passport,
-            principal=clean_principal,
-            job_role=job_role,
-            experience_level=experience_level,
             job_type=job_type,
             industry=industry,
-            street=street,
             city=city,
-            province=province,
-            zip_code=zip_code,
             country=country,
-            english_required=english_required,
             posted_by=request.user
         )
 
@@ -124,57 +133,40 @@ def post_job(request):
 
     return render(request, 'jobs/post_job.html', {'companies': companies, 'message': message})
 
+
 def job_post_success(request):
     return render(request, 'jobs/job_success.html')
 
+@login_required
 def job_list(request):
     query = request.GET.get('q', '')
-    location = request.GET.get('location', '')
-    company = request.GET.get('company', '')
-    job_type = request.GET.get('job_type', '')
-    experience = request.GET.get('experience', '')
-    min_salary = request.GET.get('min_salary')
-    max_salary = request.GET.get('max_salary')
+    jobs = Job.objects.all().order_by('-posted_at')
 
-    jobs = Job.objects.all()
+    # ✅ Load user's resume (skills + experience)
+    user_resume = Resume.objects.filter(user=request.user).order_by('-uploaded_at').first()
+    resume_text = ""
+    if user_resume:
+        resume_text = f"{user_resume.skills or ''} {user_resume.experience or ''}"
 
-    # Apply search filter
-    if query:
-        jobs = jobs.filter(
-            Q(title__icontains=query) |
-            Q(company__name__icontains=query) |
-            Q(description__icontains=query)
-        )
+    # ✅ HF Semantic Matching
+    if resume_text:
+        resume_vec = torch.tensor(semantic_similarity(resume_text)).mean(dim=1)
+        for job in jobs:
+            job_text = f"{job.title} {job.skills} {job.description}"
+            job_vec = torch.tensor(semantic_similarity(job_text)).mean(dim=1)
+            sim_score = torch.nn.functional.cosine_similarity(resume_vec, job_vec).item()
+            job.match_score = round(sim_score * 100, 2)
+    else:
+        for job in jobs:
+            job.match_score = None
 
-    if location:
-        jobs = jobs.filter(location__icontains=location)
-
-    if company:
-        jobs = jobs.filter(company__name__icontains=company)
-
-    if job_type:
-        jobs = jobs.filter(job_type__iexact=job_type)
-
-    if experience:
-        jobs = jobs.filter(experience_level__iexact=experience)
-
-    if min_salary:
-        jobs = jobs.filter(salary__gte=min_salary)
-
-    if max_salary:
-        jobs = jobs.filter(salary__lte=max_salary)
-
-    jobs = jobs.order_by('-posted_at')
-
-    # Pagination
-    paginator = Paginator(jobs, 1)  # Change 5 to your desired number per page
+    # ✅ Pagination
+    paginator = Paginator(jobs, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'jobs/job_list.html', {
-        'page_obj': page_obj,
-        'jobs': jobs,  # Optional — আপনি চাইলে শুধু `page_obj` ব্যবহার করলেও চলবে
-    })
+    return render(request, 'jobs/job_list.html', {'page_obj': page_obj})
+
 
 
 @login_required
@@ -185,7 +177,6 @@ def employer_job_list(request, user_id):
         'employer': employer,
         'jobs': jobs,
     })
-
 
 @login_required
 def delete_job(request, job_id): 
@@ -202,7 +193,6 @@ def delete_job(request, job_id):
 def edit_job(request, job_id):
     job = get_object_or_404(Job, id=job_id)
 
-    
     if request.user != job.posted_by and not request.user.is_staff:
         messages.error(request, "You are not authorized to edit this job.")
         return redirect('jobs:employer_job_list', user_id=request.user.id)
@@ -221,7 +211,6 @@ def edit_job(request, job_id):
         'job': job
     })
 
-
 @require_POST
 @login_required
 def save_job(request):
@@ -233,14 +222,13 @@ def save_job(request):
 
     job = get_object_or_404(Job, id=job_id)
 
-    
     try:
         jobseeker = Jobseeker.objects.get(user=request.user)
     except Jobseeker.DoesNotExist:
         messages.error(request, "You are not a jobseeker.")
         return redirect('jobs:job_detail', job_id=job.id)
 
-    # ✅ Job Save/Unsave Logic
+    # Job Save/Unsave Logic
     saved, created = SavedJob.objects.get_or_create(jobseeker=jobseeker, job=job)
 
     if created:
@@ -356,6 +344,12 @@ def create_job(request):
     if not can_post_job(employer):
         messages.error(request, "You have reached your job posting limit.")
         return redirect('upgrade_page')  # Optional
+
+def consume_user_token(user):
+    subscription = Subscription.objects.filter(employer=user, active=True).first()
+    if subscription and subscription.consume_token():
+        return True
+    return False
 
 def consume_user_token(user):
     subscription = Subscription.objects.filter(employer=user, active=True).first()

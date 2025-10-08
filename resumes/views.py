@@ -1,3 +1,4 @@
+# resumes/views.py
 import os
 import fitz  
 import textract
@@ -7,33 +8,39 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
 from .models import Resume
-from django.contrib.auth.models import User
+from jobseekers.models import Jobseeker
+from moderation.utils import moderate_text
 from .utils import (
     extract_email, extract_phone, extract_name,
-    extract_skills, extract_experience, extract_education, generate_tags,
-    ai_generate_tags,
+    extract_skills, extract_experience, extract_education, generate_tags
 )
-from jobseekers.models import Jobseeker
-from moderation.utils import moderate_text  # ✅ Import moderation
+
+# ✅ Hugging Face Integration
+from transformers import pipeline
+
+# Load model once (semantic tagging)
+tag_generator = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 # ✅ Allowed file extensions
 ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx']
+
 
 def extract_pdf_text(path):
     doc = fitz.open(path)
     text = ""
     for page in doc:
-        text += page.get_text() 
+        text += page.get_text()
     return text
+
+
 @login_required
 def upload_resume(request):
     if request.method == 'POST' and request.FILES.get('resume'):
         uploaded_file = request.FILES['resume']
         file_ext = os.path.splitext(uploaded_file.name)[1].lower()
 
-        # ✅ Validate file type
-        if file_ext not in ['.pdf', '.doc', '.docx']:
-            messages.error(request, "Invalid file type. Please upload a PDF, DOC, or DOCX file.")
+        if file_ext not in ALLOWED_EXTENSIONS:
+            messages.error(request, "Invalid file type. Please upload PDF, DOC or DOCX.")
             return redirect('resumes:upload_resume')
 
         fs = FileSystemStorage()
@@ -41,22 +48,19 @@ def upload_resume(request):
         file_path = fs.path(filename)
 
         try:
-            # ✅ Extract text
+            # ✅ Extract text content
             if file_ext == '.pdf':
                 text = extract_pdf_text(file_path)
             else:
                 text = textract.process(file_path).decode('utf-8')
 
-            print("🧾 Raw Extracted Text:\n", text[:1000])  # Debug
-
-            # ✅ Apply moderation (optional)
             try:
                 cleaned_text = moderate_text(text)
             except Exception as e:
-                print("⚠️ moderate_text failed, using raw text:", e)
+                print("⚠️ moderation failed:", e)
                 cleaned_text = text
 
-            # ✅ Extract individual fields
+            # ✅ Extract basic data
             full_name = extract_name(cleaned_text) or ""
             email = extract_email(cleaned_text)
             phone = extract_phone(cleaned_text)
@@ -64,20 +68,12 @@ def upload_resume(request):
             experience = extract_experience(cleaned_text) or ""
             education = extract_education(cleaned_text) or ""
 
-            # ✅ Print for debug
-            print("✅ Extracted Data:")
-            print("Full Name:", full_name)
-            print("Email:", email)
-            print("Phone:", phone)
-            print("Skills:", skills)
-            print("Experience:", experience)
-            print("Education:", education)
+            # ✅ Generate traditional + AI tags
+            base_tags = generate_tags(skills, experience)
+            ai_tags = ai_generate_tags_hf(cleaned_text)
+            combined_tags = ', '.join(set(base_tags.split(',') + ai_tags.split(',')))
 
-            # ✅ Generate tags
-            ai_tags = ai_generate_tags(cleaned_text[:1500])
-            tags = ', '.join(set(generate_tags(skills, experience).split(',') + ai_tags.split(',')))
-
-            # ✅ Save to Resume model
+            # ✅ Save resume
             Resume.objects.create(
                 user=request.user,
                 posted_by=request.user,
@@ -88,12 +84,11 @@ def upload_resume(request):
                 skills=skills,
                 experience=experience,
                 education=education,
-                tags=tags
+                tags=combined_tags
             )
 
-            # ✅ Auto-fill Jobseeker profile
+            # ✅ Sync with Jobseeker
             jobseeker, _ = Jobseeker.objects.get_or_create(user=request.user)
-
             if full_name:
                 jobseeker.full_name = full_name
             if phone:
@@ -110,19 +105,35 @@ def upload_resume(request):
 
         except Exception as e:
             print("❌ Resume parsing error:", e)
-            messages.error(request, "There was an error processing your resume.")
-
-        return redirect('resumes:resume_list')
+            messages.error(request, "Error processing your resume.")
+            return redirect('resumes:resume_list')
 
     return render(request, 'resumes/upload.html')
+
+
+def ai_generate_tags_hf(text):
+    """Generate smart tags using Hugging Face zero-shot classifier"""
+    candidate_labels = [
+        "Python", "Django", "Machine Learning", "Data Science", "React", "Project Management",
+        "Marketing", "Finance", "Education", "Engineering", "Software Development",
+        "Customer Support", "Sales", "Design", "Human Resources", "Remote Work"
+    ]
+
+    try:
+        result = tag_generator(text[:1000], candidate_labels)
+        top_labels = [label for label, score in zip(result['labels'], result['scores']) if score > 0.35]
+        return ', '.join(top_labels)
+    except Exception as e:
+        print("⚠️ AI Tagging failed:", e)
+        return ""
 
 
 def resume_success(request):
     return render(request, 'resumes/seccess.html')
 
+
 def resume_list(request):
     resumes = Resume.objects.filter(user=request.user).order_by('-id')
-
     paginator = Paginator(resumes, 1)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -132,12 +143,11 @@ def resume_list(request):
     
     return render(request, 'resumes/resume_list.html', {'page_obj': page_obj})
 
+
 @login_required
 def jobseeker_resume_list(request, user_id):
     resumes = Resume.objects.filter(posted_by__id=user_id).order_by('-uploaded_at')
-    return render(request, 'resumes/jobseeker_resume_list.html', {
-        'resumes': resumes
-    })
+    return render(request, 'resumes/jobseeker_resume_list.html', {'resumes': resumes})
 
 
 @login_required

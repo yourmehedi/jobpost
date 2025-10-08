@@ -14,7 +14,12 @@ import os
 from pathlib import Path 
 from django.core.files.base import ContentFile
 from decouple import config
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
+USE_OPENAI = os.getenv("USE_OPENAI", "false").lower() == "true"
+HF_CACHE_DIR = os.getenv("HF_CACHE_DIR", None)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,7 +87,7 @@ AUTHENTICATION_BACKENDS = (
 
 
 # Google
-GOOGLE_CLIENT_ID = "383195615954-1m29kh0m981s7ejqhpf3dginnen8gtl4.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = "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"
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_CLIENT_ID
@@ -206,6 +211,7 @@ DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+# Hf Hugging Face Transformer
 
 
 

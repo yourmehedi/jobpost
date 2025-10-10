@@ -238,8 +238,6 @@ def login_view(request):
 
     return render(request, 'accounts/login.html')
 
-
-# ✅ Forgot Password (send reset link)
 def forgot_password(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -273,7 +271,6 @@ def forgot_password(request):
         return redirect("accounts:login")
 
     return render(request, "accounts/forgot_password.html")
-
 
 def reset_password(request, uidb64, token):
     try:
@@ -461,3 +458,5 @@ def facebook_callback(request):
 
     return redirect("/")
 
+def user_select(request):
+    return render(request, 'accounts/user_select.html')

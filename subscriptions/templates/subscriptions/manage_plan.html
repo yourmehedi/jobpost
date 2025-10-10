@@ -92,6 +92,7 @@
   <h3 class="text-xl font-semibold mb-2">Existing Plans</h3>
   <table class="subscription-table">
   <tr>
+    <th>#</th>
     <th>Name</th>
     <th>Job Limit</th>
     <th>Resume View</th>
@@ -102,6 +103,7 @@
   </tr>
   {% for plan in plans %}
   <tr>
+    <td>{{ forloop.counter }}</td>
     <td>{{ plan.name }}</td>
     <td>{{ plan.job_limit }}</td>
     <td>{{ plan.resume_view_limit }}</td>

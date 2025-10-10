@@ -16,6 +16,9 @@ urlpatterns = [
     path('jobseekres-registretion-form/', views.jobseeker_register, name='jobseeker_register'),
     path('employer-registretion-form/', views.employer_register, name='employer_register'),
     
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('reset/<uidb64>/<token>/', views.reset_password, name='reset_password'),
+
     path('logout/', views.logout_view, name='logout'),
     path('login/', login_view, name='login'),
 
@@ -25,3 +28,5 @@ urlpatterns = [
     path("facebook/login/", views.facebook_login, name="facebook_login"),
     path("facebook/callback/", views.facebook_callback, name="facebook_callback"),
 ]
+
+

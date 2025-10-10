@@ -134,7 +134,10 @@
     <textarea id="jobDescription" name="jobDescription" class="form-control" rows="4" required></textarea>
 
     {% if user.has_ai_access %}
-        <button type="button" id="generateAI" class="btn btn-outline-secondary btn-sm mt-2">✨ Generate with AI</button>
+    <button type="button" id="generate-ai" class="btn btn-outline-secondary btn-sm mt-2">
+      ✨ Generate with AI
+    </button>
+
     {% endif %}
   </div>
  
@@ -253,47 +256,27 @@
 </form>
 
 
+<button id="generate-ai" type="button">Generate with AI</button>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const generateBtn = document.getElementById('generateAI');
-    const titleInput = document.getElementById('jobTitle');
-    const roleInput = document.getElementById('job_role');
-    const industryInput = document.getElementById('industry');
-    const descBox = document.getElementById('jobDescription');
+document.getElementById('generate-ai').addEventListener('click', async function(){
+  const title = document.querySelector('input[name="jobTitle"]').value;
+  const role = document.querySelector('input[name="job_role"]').value || title;
+  const industry = document.querySelector('input[name="industry"]').value || '';
 
-    if(generateBtn){
-        generateBtn.addEventListener('click', function () {
-            const title = titleInput.value.trim();
-            const role = roleInput.value.trim();
-            const industry = industryInput.value.trim();
-
-            if (!title) {
-                alert("Please enter a job title before generating.");
-                return;
-            }
-
-            fetch("/ai/generate-job-description/", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: `title=${encodeURIComponent(title)}&role=${encodeURIComponent(role)}&industry=${encodeURIComponent(industry)}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                } else {
-                    descBox.value = data.description;
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("Something went wrong while generating the description.");
-            });
-        });
-    }
+  const res = await fetch("{% url 'ai_engine:generate_job_description' %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({ title, role, industry })
+  });
+  const data = await res.json();
+  if (data.description) {
+    document.querySelector('textarea[name="jobDescription"]').value = data.description;
+  } else {
+    alert(data.error || 'AI error');
+  }
 });
 </script>
 

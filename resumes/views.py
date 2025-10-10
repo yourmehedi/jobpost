@@ -12,18 +12,11 @@ from jobseekers.models import Jobseeker
 from moderation.utils import moderate_text
 from .utils import (
     extract_email, extract_phone, extract_name,
-    extract_skills, extract_experience, extract_education, generate_tags
+    extract_skills, extract_experience, extract_education,
+    generate_tags, ai_generate_tags
 )
 
-# ✅ Hugging Face Integration
-from transformers import pipeline
-
-# Load model once (semantic tagging)
-tag_generator = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-
-# ✅ Allowed file extensions
 ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx']
-
 
 def extract_pdf_text(path):
     doc = fitz.open(path)
@@ -32,48 +25,35 @@ def extract_pdf_text(path):
         text += page.get_text()
     return text
 
-
 @login_required
 def upload_resume(request):
     if request.method == 'POST' and request.FILES.get('resume'):
         uploaded_file = request.FILES['resume']
-        file_ext = os.path.splitext(uploaded_file.name)[1].lower()
-
-        if file_ext not in ALLOWED_EXTENSIONS:
-            messages.error(request, "Invalid file type. Please upload PDF, DOC or DOCX.")
+        ext = os.path.splitext(uploaded_file.name)[1].lower()
+        if ext not in ALLOWED_EXTENSIONS:
+            messages.error(request, "Invalid file type.")
             return redirect('resumes:upload_resume')
 
         fs = FileSystemStorage()
         filename = fs.save(uploaded_file.name, uploaded_file)
-        file_path = fs.path(filename)
+        path = fs.path(filename)
 
         try:
-            # ✅ Extract text content
-            if file_ext == '.pdf':
-                text = extract_pdf_text(file_path)
-            else:
-                text = textract.process(file_path).decode('utf-8')
+            text = extract_pdf_text(path) if ext == '.pdf' else textract.process(path).decode('utf-8')
+            cleaned_text = moderate_text(text) if 'moderate_text' in globals() else text
 
-            try:
-                cleaned_text = moderate_text(text)
-            except Exception as e:
-                print("⚠️ moderation failed:", e)
-                cleaned_text = text
-
-            # ✅ Extract basic data
             full_name = extract_name(cleaned_text) or ""
-            email = extract_email(cleaned_text)
-            phone = extract_phone(cleaned_text)
+            email = extract_email(cleaned_text) or ""
+            phone = extract_phone(cleaned_text) or ""
             skills = extract_skills(cleaned_text) or ""
             experience = extract_experience(cleaned_text) or ""
             education = extract_education(cleaned_text) or ""
 
-            # ✅ Generate traditional + AI tags
             base_tags = generate_tags(skills, experience)
-            ai_tags = ai_generate_tags_hf(cleaned_text)
-            combined_tags = ', '.join(set(base_tags.split(',') + ai_tags.split(',')))
+            ai_tags = ai_generate_tags(cleaned_text)
+            combined = ', '.join([t.strip() for t in (base_tags + ',' + ai_tags).split(',') if t.strip()])
+            combined = ', '.join(sorted(set([t.strip() for t in combined.split(',') if t.strip()])))
 
-            # ✅ Save resume
             Resume.objects.create(
                 user=request.user,
                 posted_by=request.user,
@@ -84,10 +64,9 @@ def upload_resume(request):
                 skills=skills,
                 experience=experience,
                 education=education,
-                tags=combined_tags
+                tags=combined
             )
 
-            # ✅ Sync with Jobseeker
             jobseeker, _ = Jobseeker.objects.get_or_create(user=request.user)
             if full_name:
                 jobseeker.full_name = full_name
@@ -100,32 +79,32 @@ def upload_resume(request):
                 jobseeker.address = "Auto-filled from resume"
             jobseeker.save()
 
-            messages.success(request, "✅ Resume uploaded and processed successfully.")
+            messages.success(request, "Resume uploaded & processed.")
             return redirect('resumes:resume_success')
 
         except Exception as e:
-            print("❌ Resume parsing error:", e)
-            messages.error(request, "Error processing your resume.")
+            print("Resume processing error:", e)
+            messages.error(request, "Error processing resume.")
             return redirect('resumes:resume_list')
 
     return render(request, 'resumes/upload.html')
 
 
-def ai_generate_tags_hf(text):
-    """Generate smart tags using Hugging Face zero-shot classifier"""
-    candidate_labels = [
-        "Python", "Django", "Machine Learning", "Data Science", "React", "Project Management",
-        "Marketing", "Finance", "Education", "Engineering", "Software Development",
-        "Customer Support", "Sales", "Design", "Human Resources", "Remote Work"
-    ]
+# def ai_generate_tags_hf(text):
+#     """Generate smart tags using Hugging Face zero-shot classifier"""
+#     candidate_labels = [
+#         "Python", "Django", "Machine Learning", "Data Science", "React", "Project Management",
+#         "Marketing", "Finance", "Education", "Engineering", "Software Development",
+#         "Customer Support", "Sales", "Design", "Human Resources", "Remote Work"
+#     ]
 
-    try:
-        result = tag_generator(text[:1000], candidate_labels)
-        top_labels = [label for label, score in zip(result['labels'], result['scores']) if score > 0.35]
-        return ', '.join(top_labels)
-    except Exception as e:
-        print("⚠️ AI Tagging failed:", e)
-        return ""
+#     try:
+#         result = tag_generator(text[:1000], candidate_labels)
+#         top_labels = [label for label, score in zip(result['labels'], result['scores']) if score > 0.35]
+#         return ', '.join(top_labels)
+#     except Exception as e:
+#         print("⚠️ AI Tagging failed:", e)
+#         return ""
 
 
 def resume_success(request):

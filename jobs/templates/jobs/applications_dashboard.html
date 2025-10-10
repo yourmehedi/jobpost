@@ -3,6 +3,7 @@
 <h3>Job Applications</h3>
 <table class="table table-bordered">
     <tr>
+        <th>#</th>
         <th>Applicant</th>
         <th>Email</th>
         <th>Job</th>
@@ -13,6 +14,7 @@
     </tr>
     {% for app in applications %}
     <tr>
+        <td>{{ forloop.counter }}</td>
         <td>{{ app.name }}</td>
         <td>{{ app.email }}</td>
         <td>{{ app.job.title }}</td>

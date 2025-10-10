@@ -1,12 +1,17 @@
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
+from django.template.loader import render_to_string
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect
+from django.utils.encoding import force_bytes
 from rest_framework.response import Response
+from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.contrib import messages
 from urllib.parse import urlencode
@@ -17,6 +22,13 @@ from employers.models import *
 User = get_user_model()
 from .forms import *   
 import requests
+
+
+
+
+
+
+
 
 # @api_view(['POST'])
 # @permission_classes([AllowAny])
@@ -84,7 +96,6 @@ def download_image(url, user):
         user.image.save(file_name, ContentFile(response.content))
         user.save()
 
-
 @api_view(['GET'])
 def user_profile(request):
     user = request.user
@@ -97,6 +108,8 @@ def user_profile(request):
     else:
         return Response({'error': 'User not authenticated'}, status=401)
 
+def logout_view(request):
+    return render(request, 'accounts/logout.html')
 
 def jobseeker_register(request):
     if request.method == 'POST':
@@ -226,10 +239,67 @@ def login_view(request):
     return render(request, 'accounts/login.html')
 
 
+# ✅ Forgot Password (send reset link)
+def forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, "No account found with this email address.")
+            return redirect("accounts:forgot_password")
 
-def logout_view(request):
-    return render(request, 'accounts/logout.html')
+        # Token তৈরি করে Reset URL বানানো
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_link = request.build_absolute_uri(f"/accounts/reset/{uid}/{token}/")
 
+        # ইমেইল পাঠানো
+        subject = "Password Reset Request"
+        message = render_to_string("accounts/password_reset_email.html", {
+            "user": user,
+            "reset_link": reset_link,
+        })
+
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
+        messages.success(request, "A password reset link has been sent to your email.")
+        return redirect("accounts:login")
+
+    return render(request, "accounts/forgot_password.html")
+
+
+def reset_password(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        if request.method == "POST":
+            password = request.POST.get("password")
+            confirm_password = request.POST.get("confirm_password")
+
+            if password != confirm_password:
+                messages.error(request, "Passwords do not match.")
+                return redirect(request.path)
+
+            user.set_password(password)
+            user.save()
+            messages.success(request, "Password reset successful. You can now log in.")
+            return redirect("accounts:login")
+
+        return render(request, "accounts/reset_password.html", {"validlink": True})
+    else:
+        messages.error(request, "Invalid or expired reset link.")
+        return render(request, "accounts/reset_password.html", {"validlink": False})
 
 def google_login(request):
     """Step 1: Redirect user to Google's OAuth 2.0 server"""
@@ -241,7 +311,6 @@ def google_login(request):
         "&scope=openid%20email%20profile"
     )
     return redirect(google_auth_url)
-
 
 def google_callback(request):
     code = request.GET.get("code")
@@ -305,7 +374,6 @@ def google_callback(request):
     return redirect("/")
 
 # Facebook login system section
-
 def facebook_login(request):
     params = {
         "client_id": settings.FACEBOOK_CLIENT_ID,
@@ -316,7 +384,6 @@ def facebook_login(request):
     }
     url = "https://www.facebook.com/v16.0/dialog/oauth?" + urlencode(params)
     return redirect(url)
-
 
 def fetch_facebook_access_token(code):
     token_url = "https://graph.facebook.com/v16.0/oauth/access_token"
@@ -329,8 +396,8 @@ def fetch_facebook_access_token(code):
     resp = requests.get(token_url, params=params)
     return resp.json()
 
-
 def facebook_callback(request):
+
     code = request.GET.get("code")
     if not code:
         return HttpResponse("No code provided", status=400)
@@ -393,3 +460,4 @@ def facebook_callback(request):
     jobseeker.save()
 
     return redirect("/")
+

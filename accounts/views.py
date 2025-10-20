@@ -24,12 +24,6 @@ from .forms import *
 import requests
 
 
-
-
-
-
-
-
 # @api_view(['POST'])
 # @permission_classes([AllowAny])
 # def google_login(request):
@@ -298,23 +292,12 @@ def reset_password(request, uidb64, token):
         messages.error(request, "Invalid or expired reset link.")
         return render(request, "accounts/reset_password.html", {"validlink": False})
 
-def google_login(request):
-    """Step 1: Redirect user to Google's OAuth 2.0 server"""
-    google_auth_url = (
-        "https://accounts.google.com/o/oauth2/v2/auth"
-        "?response_type=code"
-        f"&client_id={settings.GOOGLE_CLIENT_ID}"
-        f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
-        "&scope=openid%20email%20profile"
-    )
-    return redirect(google_auth_url)
-
 def google_callback(request):
     code = request.GET.get("code")
     if not code:
         return HttpResponse("No code provided", status=400)
 
-    # Exchange code for tokens
+    # --- Get access token ---
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "code": code,
@@ -323,6 +306,7 @@ def google_callback(request):
         "redirect_uri": settings.GOOGLE_REDIRECT_URI,
         "grant_type": "authorization_code",
     }
+
     r = requests.post(token_url, data=data)
     token_data = r.json()
     access_token = token_data.get("access_token")
@@ -330,7 +314,7 @@ def google_callback(request):
     if not access_token:
         return HttpResponse("Failed to obtain access token", status=400)
 
-    # Get user info
+    # --- Get user info from Google ---
     user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
     params = {"access_token": access_token}
     user_info = requests.get(user_info_url, params=params).json()
@@ -341,34 +325,50 @@ def google_callback(request):
     if not email:
         return HttpResponse("Failed to fetch user info", status=400)
 
-    # Create or get user
+    # --- Get the saved user_type from session (default jobseeker) ---
+    user_type = request.session.get("pending_user_type", "jobseeker")
+
+    # --- Create or get user ---
     user, created = User.objects.get_or_create(
         email=email,
         defaults={
-            "username": email,  # CustomUser এ username required হলে
+            "username": email,
             "first_name": name.split(" ")[0] if name else "",
             "last_name": " ".join(name.split(" ")[1:]) if name and len(name.split(" ")) > 1 else "",
-            "user_type": "jobseeker",  # Default type
+            "user_type": user_type,
+            "is_verified": True,
+            "is_approved": True if user_type == "employer" else False,  # employers auto-approved or manual later
         },
     )
 
-    # Login user
+    # --- Login user ---
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
 
-    # Create or update Jobseeker profile
-    jobseeker, _ = Jobseeker.objects.get_or_create(user=user)
-    jobseeker.full_name = name
-    jobseeker.email = email
+    # --- Create or update profile based on user_type ---
+    if user_type == "jobseeker":
+        jobseeker, _ = Jobseeker.objects.get_or_create(user=user)
+        jobseeker.full_name = name
+        jobseeker.email = email
+        if not jobseeker.gender:
+            jobseeker.gender = "other"
+        if not jobseeker.contact_number:
+            jobseeker.contact_number = "N/A"
+        jobseeker.save()
 
-    # Default fallback values
-    if not jobseeker.gender:
-        jobseeker.gender = "other"
-    if not jobseeker.contact_number:
-        jobseeker.contact_number = "N/A"
+    elif user_type == "employer":
+        from employers.models import EmployerProfile
+        employer, _ = EmployerProfile.objects.get_or_create(user=user)
+        employer.company_name = name or "Unnamed Company"
+        employer.email = email
+        employer.save()
 
-    jobseeker.save()
+    # --- Clear session data ---
+    if "pending_user_type" in request.session:
+        del request.session["pending_user_type"]
 
     return redirect("/")
+
+
 
 # Facebook login system section
 def facebook_login(request):
@@ -458,5 +458,37 @@ def facebook_callback(request):
 
     return redirect("/")
 
-def user_select(request):
-    return render(request, 'accounts/user_select.html')
+# def user_select(request):
+#     return render(request, 'accounts/user_select.html')
+
+# def user_select_fb(request):
+#     return render(request, 'accounts/user_select_fb.html')
+
+
+
+
+def choose_user_type(request):
+    if request.method == "POST":
+        user_type = request.POST.get("user_type")
+
+        if user_type not in ["jobseeker", "employer"]:
+            messages.error(request, "Please select a valid role.")
+            return redirect("choose_user_type")
+
+        # Save temporarily in session
+        request.session["pending_user_type"] = user_type
+
+        # Redirect to Google login, NOT callback
+        return redirect("accounts:google_login")
+
+    return render(request, "accounts/choose_user_type.html")
+
+def google_login(request):
+    google_auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth"
+        "?response_type=code"
+        f"&client_id={settings.GOOGLE_CLIENT_ID}"
+        f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
+        "&scope=email%20profile"
+    )
+    return redirect(google_auth_url)

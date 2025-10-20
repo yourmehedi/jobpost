@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Role</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .form-check {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .form-check:hover {
+            border-color: #3498db;
+            background-color: #f8fafc;
+        }
+        
+        .form-check.selected {
+            border-color: #3498db;
+            background-color: #e8f4fc;
+        }
+        
+        .form-check-input {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .form-check-label {
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .role-description {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 25px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 0;
+            }
+            
+            h3 {
+                font-size: 22px;
+            }
+            
+            .form-check {
+                padding: 12px;
+            }
+            
+            .form-check-label {
+                font-size: 15px;
+            }
+            
+            .role-description {
+                font-size: 13px;
+            }
+            
+            .btn {
+                padding: 12px;
+                font-size: 15px;
+            }
+        }
+        
+        /* Animation for selection */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .form-check.selected {
+            animation: pulse 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Select Your Role</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-check" onclick="selectRole(this)">
+            <input class="form-check-input" type="radio" name="user_type" value="jobseeker" required>
+            <label class="form-check-label">
+                <span class="icon">👤</span> Job Seeker
+                <span class="role-description">Looking for employment opportunities</span>
+            </label>
+        </div>
+        <div class="form-check" onclick="selectRole(this)">
+            <input class="form-check-input" type="radio" name="user_type" value="employer" required>
+            <label class="form-check-label">
+                <span class="icon">💼</span> Employer
+                <span class="role-description">Looking to hire talent</span>
+            </label>
+        </div>
+        <button class="btn" type="submit" id="submitBtn" disabled>Continue</button>
+    </form>
+</div>
+
+<script>
+    function selectRole(element) {
+        // Remove selected class from all options
+        const allOptions = document.querySelectorAll('.form-check');
+        allOptions.forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        element.classList.add('selected');
+        
+        // Check the radio input
+        const radioInput = element.querySelector('input[type="radio"]');
+        radioInput.checked = true;
+        
+        // Enable the submit button
+        document.getElementById('submitBtn').disabled = false;
+    }
+    
+    // Add click event listeners to all form-check elements
+    document.querySelectorAll('.form-check').forEach(element => {
+        element.addEventListener('click', function() {
+            selectRole(this);
+        });
+    });
+</script>
+
+</body>
+</html>

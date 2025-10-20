@@ -12,7 +12,8 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    path('user-select/', views.user_select, name='user_select'),
+    # path('user-select/', views.user_select, name='user_select'),
+    # path('user-select-facebook/', views.user_select_fb, name='user_select_fb'),
 
     path('profile/', views.user_profile, name='profile'),
     path('jobseekres-registretion-form/', views.jobseeker_register, name='jobseeker_register'),
@@ -23,6 +24,8 @@ urlpatterns = [
 
     path('logout/', views.logout_view, name='logout'),
     path('login/', login_view, name='login'),
+
+    path("choose_user_type/", views.choose_user_type, name="choose_user_type"),
 
     path("google/login/", views.google_login, name="google_login"),
     path("google/callback/", views.google_callback, name="google_callback"),
